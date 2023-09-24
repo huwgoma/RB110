@@ -199,11 +199,8 @@ def find_row_wincons(board, length)
   row_start_squares = board.keys.select.with_index { |square, index| (index % length).zero? }
 
   row_start_squares.map do |square|
-    winning_row = []
-    until winning_row.size == length
-      winning_row << square
-      square += 1
-    end
+    winning_row = [square]
+    winning_row << square += 1 until winning_row.size == length
     winning_row
   end
 end
