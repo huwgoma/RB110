@@ -1,11 +1,11 @@
-require 'pry'
 # Tic Tac Toe
+require 'pry'
 
-EMPTY_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 BOARD_LENGTH = 3
 
+# Game Messages
 def prompt(str)
   puts ">> #{str}"
 end
@@ -14,7 +14,7 @@ end
 #         4 => " ", 5 => " ", 6 => " ",
 #         7 => " ", 8 => " ", 9 => " " }
 def create_board
-  (1..(BOARD_LENGTH**2)).map { |int| [int, EMPTY_MARKER] }.to_h
+  (1..(BOARD_LENGTH**2)).map { |int| [int, int.to_s] }.to_h
 end
 
 def display_board(board)
@@ -31,7 +31,7 @@ def display_board(board)
 end
 
 def empty_squares(board)
-  board.select { |_int, str| str.strip.empty? }.keys
+  board.keys.reject { |key| [PLAYER_MARKER, COMPUTER_MARKER].include?(board[key]) }
 end
 
 # Player Move
@@ -71,18 +71,18 @@ def find_winner(board)
   win_conditions = find_wincons(board)
 
   # Splat operator (*) passes in each element of `line` as an argument to #values_at
-  line_values = win_conditions.map { |line| board.values_at(*line) } 
+  line_values = win_conditions.map { |line| board.values_at(*line) }
 
   line_values.each do |line|
-    return 'Player' if line.all? { |square| square == PLAYER_MARKER } 
-    return 'Computer' if line.all? { |square| square == COMPUTER_MARKER}
+    return 'Player' if line.all? { |square| square == PLAYER_MARKER }
+    return 'Computer' if line.all? { |square| square == COMPUTER_MARKER }
   end
   nil
 end
 
 def find_wincons(board)
   board_length = Math.sqrt(board.size).to_i
-  
+
   row_wincons = find_row_wincons(board, board_length)
   column_wincons = find_column_wincons(board, board_length)
   diagonal_wincons = find_diagonal_wincons(board, board_length)
@@ -91,7 +91,8 @@ end
 
 def find_row_wincons(board, length)
   # Can also just use the #each_slice method but I wanted to do it without method hunting
-  row_start_squares = board.keys.select.with_index { |square, index| (index % length).zero? }
+
+  row_start_squares = board.keys.select.with_index { |_square, index| (index % length).zero? }
 
   row_start_squares.map do |square|
     winning_row = [square]
@@ -102,7 +103,7 @@ end
 
 def find_column_wincons(board, length)
   column_start_squares = board.keys.first(length)
-  
+
   column_start_squares.map do |square|
     winning_column = [square]
     winning_column << square += length until winning_column.size == length
