@@ -152,6 +152,7 @@ wincons = []
 board_length = Math.sqrt(board.size).to_i
 row_wincons = find_row_wincons(board, board_length)
 column_wincons = find_column_wincons(board, board_length)
+diagonal_wincons = find_diagonal_wincons(board, board_length)
 binding.pry
 
 
@@ -193,7 +194,23 @@ def find_column_wincons(board, length)
   end
 end
 
+def find_diagonal_wincons(board, length)
+  diagonal_start_squares = [board.keys.first, board.keys[length - 1]]
 
+  diagonal_start_squares.map.with_index do |square, index|
+    winning_diagonal = [square]
+    increment = index.even? ? length + 1 : length - 1
+    winning_diagonal << square += increment until winning_diagonal.size == length
+    winning_diagonal
+  end
+
+  # Diagonal Start Squares: Only 2 - the first square and the <length> square. (top left and right squares)
+
+  # eg. [1..9] => [1, 3]
+  # Transform: Iterate through the two starting diagonal squares and return an array of winning diagonal squares. For each integer (square):
+  #   First Integer: Increment integer by length + 1 ([1] => 3+1 = 4 => [1, 5]) and add to array
+  #   Second Integer: Increment integer by length - 1 and add to array.
+end
 
 # Again?
 def play_again?
