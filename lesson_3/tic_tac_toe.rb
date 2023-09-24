@@ -4,17 +4,17 @@ require 'pry'
 EMPTY_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+BOARD_LENGTH = 3
 
 def prompt(str)
   puts ">> #{str}"
 end
 
-# Board
-# { 1 => " ", 2 => " ", 3 => " ",
-#   4 => " ", 5 =>" ", 6 => " ",
-#   7 => " ", 8 => " ", 9 => " " }
+# Board { 1 => " ", 2 => " ", 3 => " ",
+#         4 => " ", 5 => " ", 6 => " ",
+#         7 => " ", 8 => " ", 9 => " " }
 def create_board
-  (1..9).map { |int| [int, EMPTY_MARKER] }.to_h
+  (1..(BOARD_LENGTH**2)).map { |int| [int, EMPTY_MARKER] }.to_h
 end
 
 def display_board(board)
@@ -23,9 +23,8 @@ def display_board(board)
 
   board.each do |key, value|
     print " #{value} "
-
     if key < board.size
-      print (key % 3).zero? ? "\n---+---+---\n" : "|"
+      print (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
     end
   end
   puts "\n"
@@ -49,7 +48,7 @@ def player_move(board)
 end
 
 def valid_move?(move, board)
-  move.to_i.between?(1, 9) &&
+  move.to_i.between?(1, board.size) &&
     empty_squares(board).include?(move.to_i)
 end
 
