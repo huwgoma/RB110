@@ -69,6 +69,16 @@
 
 
 # =========== Finding Wincons ============
+# Calculate Horizontal Wincons:
+# Horizontal Start Cells: Select the first element from the board keys array, 
+#   then every +<length> element from there, until horizontal size = length
+#   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] => [1], [1, 4], [1, 4, 7]
+#   Initialize an empty array, result = []
+#   Transform: Iterate through [1, 4, 7]. For each element, calculate the squares 
+#   that constitute a winning row and return them in an array, added to result.
+#     - Until subarray size is <length>, add +1 to each element and append to subarr
+
+
 # find_row_wincons
   # Input: An array of integers (1-9) and an integer representing the length (number of elements to take)
   #   board_keys = [1, 2, 3, 4, 5, 6, 7, 8, 9]; length = 3

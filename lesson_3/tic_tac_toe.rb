@@ -151,16 +151,9 @@ def find_wincons(board)
 wincons = []
 board_length = Math.sqrt(board.size).to_i
 row_wincons = find_row_wincons(board, board_length)
+column_wincons = find_column_wincons(board, board_length)
 binding.pry
-# [[1, 2, 3],[4, 5, 6], [7, 8, 9]]
 
-# counter = 0/1
-# Iterate through the board hash (keys?) until counter is equal to length
-
-
-# Vertical: 
-#   - +3 from the starting cell
-#   eg. 1, 4, 7; 2, 5, 8
 
 # Diagonal: 
 #   - +4 and +2 (3x3)
@@ -173,25 +166,10 @@ binding.pry
 #   Initialize an empty array, wincons = []
 #   Calculate the length of the board. sqrt(board size)
 
-# Calculate Horizontal Wincons:
-# Horizontal Start Cells: Select the first element from the board keys array, 
-#   then every +<length> element from there, until horizontal size = length
-#   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] => [1], [1, 4], [1, 4, 7]
-#   Initialize an empty array, result = []
-#   Transform: Iterate through [1, 4, 7]. For each element, calculate the squares 
-#   that constitute a winning row and return them in an array, added to result.
-#     - Until subarray size is <length>, add +1 to each element and append to subarr
-
-
-# Vertical Start Cells: Select the first <length> elements from board keys:
-#   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] => [1], [1, 2], [1, 2, 3]
 
 # Diagonal Start Cells: Select the first element and the <length> element:
 #   eg. #   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] - Select first (1) and 3rd (3)
 
-# Iterate through horizontal start cells [1, 4, 7]. For each element, calculate 
-#   the squares that constitute a winning horizontal line (ie. a row):
-#   
 end
 
 def find_row_wincons(board, length)
@@ -205,6 +183,15 @@ def find_row_wincons(board, length)
   end
 end
 
+def find_column_wincons(board, length)
+  column_start_squares = board.keys.first(length)
+  
+  column_start_squares.map do |square|
+    winning_column = [square]
+    winning_column << square += length until winning_column.size == length
+    winning_column
+  end
+end
 
 
 
