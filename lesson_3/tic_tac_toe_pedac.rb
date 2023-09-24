@@ -62,3 +62,39 @@
 # If input is valid, mark the square:
 #   - Change the corresponding square's value to 'X' or 'O' (depending on
 #     the player's symbol.)
+
+
+
+
+
+
+# =========== Finding Wincons ============
+# find_row_wincons
+  # Input: An array of integers (1-9) and an integer representing the length (number of elements to take)
+  #   board_keys = [1, 2, 3, 4, 5, 6, 7, 8, 9]; length = 3
+  #                 0        3        6
+  # Output: A new array containing every <3> elements from board_keys, starting with the first.
+  #   row_start = [1, 4, 7]
+
+  # Initialize an empty array, row_start = []
+  # Selection: Iterate over the board_keys array, with index. For each integer:
+  #   If the index is divisible by <3>, select the element 
+
+
+    # From [1, 4, 7]:
+  # Input: [1, 4, 7] array.
+  # Output: An array of arrays. Each subarray represents a winning row and is size <length>.
+  #   eg. [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+  # Transform: Iterate through the input array. For each integer:
+  #   Initialize an empty array, result = [].
+  #   Until result size == length:
+  #     Add the current integer to result
+  #     Increment integer by 1
+    # Return an array containing every <3> elements from board_keys.
+    # eg. [1, 4, 7]
+
+# Horizontal: 
+#   - Each sequence of (length) keys = 1 row. 
+#   +1 from the starting cell
+#   eg. 1, 2, 3 is one row; 4, 5, 6; 7, 8, 9
+#   Subarray size = board length

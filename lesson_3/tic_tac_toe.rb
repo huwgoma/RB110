@@ -10,25 +10,23 @@ def prompt(str)
 end
 
 # Board
-# { 1=>" ", 2=>" ", 3=>" ",
-#   4=>" ", 5=>" ", 6=>" ", 
-#   7=>" ", 8=>" ", 9=>" " } 
-def create_board 
+# { 1 => " ", 2 => " ", 3 => " ",
+#   4 => " ", 5 =>" ", 6 => " ",
+#   7 => " ", 8 => " ", 9 => " " }
+def create_board
   (1..9).map { |int| [int, EMPTY_MARKER] }.to_h
 end
 
 def display_board(board)
   system 'clear'
   prompt("You are #{PLAYER_MARKER}; Computer is #{COMPUTER_MARKER}.")
-  counter = 1
+
   board.each do |key, value|
     print " #{value} "
-    
-    if counter < board.size 
-      print (counter % 3).zero? ?  "\n---+---+---\n" : "|"
+
+    if key < board.size
+      print (key % 3).zero? ? "\n---+---+---\n" : "|"
     end
-    
-    counter += 1
   end
   puts "\n"
 end
@@ -51,7 +49,7 @@ def player_move(board)
 end
 
 def valid_move?(move, board)
-  move.to_i.between?(1, 9) && 
+  move.to_i.between?(1, 9) &&
     empty_squares(board).include?(move.to_i)
 end
 
@@ -73,32 +71,147 @@ end
 def find_winner(board)
   # Return a string representing the winner ("player" or "computer")
   # nil if no winner
+  
+  # Input: Hash representing the board
+  # Output: String representing the winner (Player or Computer); nil if no winner
+
+  # Define a constant WIN_CONDITIONS - a 2D array of all winning combinations
+  #   for the given board size
+  # Iterate through win conditions. For each subarray:
+  #   Find the values at the corresponding board cells in the current subarray.
+  #   eg. [1, 2, 3] ; board's values at 1, 2, 3 => ["X", "X", "O"]
+  #   Find the first value in the line. 
+  #   If the first value is X or O (ie. not default empty), iterate through the
+  #   subarray of values. For each value:
+  #   Determine whether ALL values are equal to the first element. If yes, 
+  #   return true; otherwise, false.
+
+  #   If ALL values == first element, return a string: 
+  #     Player if first element == PLAYER MARKER, computer vice versa
+
+  #   Return nil if none of the win conditions return true
+  
+  
+  find_wincons(board)
+  
+  
   win_conditions = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
                     [1, 4, 7], [2, 5, 8], [3, 6, 9],
                     [1, 5, 9], [3, 5, 7]]
+  
+  
+  
+  
+  
+  
+  
 
   win_conditions.each do |subarr|
-    if board[subarr[0]] == PLAYER_MARKER && 
-      board[subarr[1]] == PLAYER_MARKER &&
-      board[subarr[2]] == PLAYER_MARKER
+    if board[subarr[0]] == PLAYER_MARKER &&
+       board[subarr[1]] == PLAYER_MARKER &&
+       board[subarr[2]] == PLAYER_MARKER
       return 'Player'
-    elsif board[subarr[0]] == COMPUTER_MARKER && 
-      board[subarr[1]] == COMPUTER_MARKER &&
-      board[subarr[2]] == COMPUTER_MARKER
+    elsif board[subarr[0]] == COMPUTER_MARKER &&
+          board[subarr[1]] == COMPUTER_MARKER &&
+          board[subarr[2]] == COMPUTER_MARKER
       return 'Computer'
     end
-
-    
-    # Iterate through each element of subarray. Check if the corresponding 
-    # squares are all X or all O
-
-    # If any subarray returns true, stop iterating and return the value of those
-    # squares (x or o)
   end
   nil
-  # Using x or o, match it to a string - player or computer
 end
 
+def find_wincons(board)
+# Input: Hash representing a board.
+#   Assume board size is a square (ie. 3x3, 4x4)
+
+# Output: A nested array of subarrays representing all possible wincons
+#   - Wincons are all horizontal rows, all vertical columns, and the two diagonals
+
+# eg. # { 1 => " ", 2 => " ", 3 => " ",
+#         4 => " ", 5 =>" ", 6 => " ",
+#         7 => " ", 8 => " ", 9 => " " }
+
+
+# (4x4)
+# { 1, 2, 3, 4
+#   5, 6, 7, 8,
+#   9, 10,11,12,
+#   13,14,15,16
+# }
+
+# [[1, 2, 3], [4, 5, 6], [7, 8, 9],
+# [1, 4, 7], [2, 5, 8], [3, 6, 9],
+# [1, 5, 9], [3, 5, 7]]
+
+# Data: Hash (Board), nested array (return)
+
+# Initialize a new empty array, wincons = []
+# Find the length of the board: board size sqrt
+#   eg. board size => 9; sqrt => 3
+wincons = []
+board_length = Math.sqrt(board.size).to_i
+row_wincons = find_row_wincons(board, board_length)
+binding.pry
+# [[1, 2, 3],[4, 5, 6], [7, 8, 9]]
+
+# counter = 0/1
+# Iterate through the board hash (keys?) until counter is equal to length
+
+
+# Vertical: 
+#   - +3 from the starting cell
+#   eg. 1, 4, 7; 2, 5, 8
+
+# Diagonal: 
+#   - +4 and +2 (3x3)
+#   - +5 and +3 (4x4)
+#   - +6 and +4 (5x5)
+#    Board length +/- 1 from starting cell.
+
+# Algorithm:
+#   Initialize a counter variable = 0
+#   Initialize an empty array, wincons = []
+#   Calculate the length of the board. sqrt(board size)
+
+# Calculate Horizontal Wincons:
+# Horizontal Start Cells: Select the first element from the board keys array, 
+#   then every +<length> element from there, until horizontal size = length
+#   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] => [1], [1, 4], [1, 4, 7]
+#   Initialize an empty array, result = []
+#   Transform: Iterate through [1, 4, 7]. For each element, calculate the squares 
+#   that constitute a winning row and return them in an array, added to result.
+#     - Until subarray size is <length>, add +1 to each element and append to subarr
+
+
+# Vertical Start Cells: Select the first <length> elements from board keys:
+#   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] => [1], [1, 2], [1, 2, 3]
+
+# Diagonal Start Cells: Select the first element and the <length> element:
+#   eg. #   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] - Select first (1) and 3rd (3)
+
+# Iterate through horizontal start cells [1, 4, 7]. For each element, calculate 
+#   the squares that constitute a winning horizontal line (ie. a row):
+#   
+end
+
+def find_row_wincons(board, length)
+  # Can also just use the #each_slice method but I wanted to do it without method hunting
+  row_start_squares = board.keys.select.with_index { |square, index| (index % length).zero? }
+
+  row_start_squares.map do |square|
+    winning_row = []
+    until winning_row.size == length
+      winning_row << square
+      square += 1
+    end
+    winning_row
+  end
+end
+
+
+
+
+# Again?
 def play_again?
   loop do
     prompt("Play again? Y/N")
@@ -131,5 +244,3 @@ loop do
 end
 
 puts "Thanks for playing!"
-
-
