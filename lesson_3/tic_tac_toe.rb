@@ -69,53 +69,14 @@ def winner?(board)
 end
 
 def find_winner(board)
-  # Return a string representing the winner ("player" or "computer")
-  # nil if no winner
-  
-  # Input: Hash representing the board
-  # Output: String representing the winner (Player or Computer); nil if no winner
+  win_conditions = find_wincons(board)
 
-  # Define a constant WIN_CONDITIONS - a 2D array of all winning combinations
-  #   for the given board size
-  # Iterate through win conditions. For each subarray:
-  #   Find the values at the corresponding board cells in the current subarray.
-  #   eg. [1, 2, 3] ; board's values at 1, 2, 3 => ["X", "X", "O"]
-  #   Find the first value in the line. 
-  #   If the first value is X or O (ie. not default empty), iterate through the
-  #   subarray of values. For each value:
-  #   Determine whether ALL values are equal to the first element. If yes, 
-  #   return true; otherwise, false.
+  # Splat operator (*) passes in each element of `line` as an argument to #values_at
+  line_values = win_conditions.map { |line| board.values_at(*line) } 
 
-  #   If ALL values == first element, return a string: 
-  #     Player if first element == PLAYER MARKER, computer vice versa
-
-  #   Return nil if none of the win conditions return true
-  
-  
-  find_wincons(board)
-  
-  
-  win_conditions = [[1, 2, 3], [4, 5, 6], [7, 8, 9],
-                    [1, 4, 7], [2, 5, 8], [3, 6, 9],
-                    [1, 5, 9], [3, 5, 7]]
-  
-  
-  
-  
-  
-  
-  
-
-  win_conditions.each do |subarr|
-    if board[subarr[0]] == PLAYER_MARKER &&
-       board[subarr[1]] == PLAYER_MARKER &&
-       board[subarr[2]] == PLAYER_MARKER
-      return 'Player'
-    elsif board[subarr[0]] == COMPUTER_MARKER &&
-          board[subarr[1]] == COMPUTER_MARKER &&
-          board[subarr[2]] == COMPUTER_MARKER
-      return 'Computer'
-    end
+  line_values.each do |line|
+    return 'Player' if line.all? { |square| square == PLAYER_MARKER } 
+    return 'Computer' if line.all? { |square| square == COMPUTER_MARKER}
   end
   nil
 end
