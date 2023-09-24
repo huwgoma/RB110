@@ -121,56 +121,12 @@ def find_winner(board)
 end
 
 def find_wincons(board)
-# Input: Hash representing a board.
-#   Assume board size is a square (ie. 3x3, 4x4)
-
-# Output: A nested array of subarrays representing all possible wincons
-#   - Wincons are all horizontal rows, all vertical columns, and the two diagonals
-
-# eg. # { 1 => " ", 2 => " ", 3 => " ",
-#         4 => " ", 5 =>" ", 6 => " ",
-#         7 => " ", 8 => " ", 9 => " " }
-
-
-# (4x4)
-# { 1, 2, 3, 4
-#   5, 6, 7, 8,
-#   9, 10,11,12,
-#   13,14,15,16
-# }
-
-# [[1, 2, 3], [4, 5, 6], [7, 8, 9],
-# [1, 4, 7], [2, 5, 8], [3, 6, 9],
-# [1, 5, 9], [3, 5, 7]]
-
-# Data: Hash (Board), nested array (return)
-
-# Initialize a new empty array, wincons = []
-# Find the length of the board: board size sqrt
-#   eg. board size => 9; sqrt => 3
-wincons = []
-board_length = Math.sqrt(board.size).to_i
-row_wincons = find_row_wincons(board, board_length)
-column_wincons = find_column_wincons(board, board_length)
-diagonal_wincons = find_diagonal_wincons(board, board_length)
-binding.pry
-
-
-# Diagonal: 
-#   - +4 and +2 (3x3)
-#   - +5 and +3 (4x4)
-#   - +6 and +4 (5x5)
-#    Board length +/- 1 from starting cell.
-
-# Algorithm:
-#   Initialize a counter variable = 0
-#   Initialize an empty array, wincons = []
-#   Calculate the length of the board. sqrt(board size)
-
-
-# Diagonal Start Cells: Select the first element and the <length> element:
-#   eg. #   eg. [1, 2, 3, 4, 5, 6, 7, 8, 9] - Select first (1) and 3rd (3)
-
+  board_length = Math.sqrt(board.size).to_i
+  
+  row_wincons = find_row_wincons(board, board_length)
+  column_wincons = find_column_wincons(board, board_length)
+  diagonal_wincons = find_diagonal_wincons(board, board_length)
+  row_wincons + column_wincons + diagonal_wincons
 end
 
 def find_row_wincons(board, length)
@@ -203,13 +159,6 @@ def find_diagonal_wincons(board, length)
     winning_diagonal << square += increment until winning_diagonal.size == length
     winning_diagonal
   end
-
-  # Diagonal Start Squares: Only 2 - the first square and the <length> square. (top left and right squares)
-
-  # eg. [1..9] => [1, 3]
-  # Transform: Iterate through the two starting diagonal squares and return an array of winning diagonal squares. For each integer (square):
-  #   First Integer: Increment integer by length + 1 ([1] => 3+1 = 4 => [1, 5]) and add to array
-  #   Second Integer: Increment integer by length - 1 and add to array.
 end
 
 # Again?

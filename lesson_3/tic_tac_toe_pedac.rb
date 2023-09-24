@@ -68,7 +68,37 @@
 
 
 
-# =========== Finding Wincons ============
+# =========== Finding Wincons ============\
+# Input: Hash representing a board.
+#   Assume board size is a square (ie. 3x3, 4x4)
+
+# Output: A nested array of subarrays representing all possible wincons
+#   - Wincons are all horizontal rows, all vertical columns, and the two diagonals
+
+# eg. # { 1 => " ", 2 => " ", 3 => " ",
+#         4 => " ", 5 =>" ", 6 => " ",
+#         7 => " ", 8 => " ", 9 => " " }
+
+
+# (4x4)
+# { 1, 2, 3, 4
+#   5, 6, 7, 8,
+#   9, 10,11,12,
+#   13,14,15,16
+# }
+
+# [[1, 2, 3], [4, 5, 6], [7, 8, 9],
+# [1, 4, 7], [2, 5, 8], [3, 6, 9],
+# [1, 5, 9], [3, 5, 7]]
+
+# Data: Hash (Board), nested array (return)
+
+# Initialize a new empty array, wincons = []
+# Find the length of the board: board size sqrt
+#   eg. board size => 9; sqrt => 3
+
+
+
 # Calculate Horizontal Wincons:
 # Horizontal Start Cells: Select the first element from the board keys array, 
 #   then every +<length> element from there, until horizontal size = length
@@ -108,3 +138,9 @@
 #   +1 from the starting cell
 #   eg. 1, 2, 3 is one row; 4, 5, 6; 7, 8, 9
 #   Subarray size = board length
+
+# Diagonal: 
+#   - +4 and +2 (3x3)
+#   - +5 and +3 (4x4)
+#   - +6 and +4 (5x5)
+#    Board length +/- 1 from starting cell.
