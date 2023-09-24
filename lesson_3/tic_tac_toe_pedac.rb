@@ -52,3 +52,13 @@
 #     Is divisible by 3: Print a new line + separator. 
 #     Otherwise: print a pipe.
 # Increment counter by 1.
+
+
+# ===== Player Move =====
+# Prompt the user to select a square (1-9).
+#   Validate the input: 
+#     - Must be within 1-9,
+#     - The corresponding square must be empty
+# If input is valid, mark the square:
+#   - Change the corresponding square's value to 'X' or 'O' (depending on
+#     the player's symbol.)
