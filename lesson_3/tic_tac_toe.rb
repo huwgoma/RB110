@@ -10,6 +10,18 @@ def prompt(str)
   puts ">> #{str}"
 end
 
+def joinor(array, separator=', ', last_separator='or')
+  case array.size
+  when 0, 1
+    array.join
+  when 2
+    array.join(" #{last_separator} ")
+  else
+    array[-1] = "#{last_separator} #{array.last}"
+    array.join(separator)
+  end
+end
+
 # Board { 1 => " ", 2 => " ", 3 => " ",
 #         4 => " ", 5 => " ", 6 => " ",
 #         7 => " ", 8 => " ", 9 => " " }
@@ -38,7 +50,7 @@ end
 def player_move(board)
   input = ''
   loop do
-    prompt("Pick an empty square (#{empty_squares(board).join(', ')}):")
+    prompt("Pick an empty square (#{joinor(empty_squares(board))}):")
     input = gets.chomp
 
     break if valid_move?(input, board)
