@@ -43,31 +43,18 @@ def choose_marker
   [marker, unused_marker]
 end
 
-
-# Board
-
-# Maybe a generalized display method:
-# - Display overall round count (player 1 computer 0)
-# - Display who's what marker (player X computer O)
-# - Display board.
-def display_game(board)
+# Game Display
+def display_game(board, scores)
   system('clear')
-  # display_score(score_a, score_b)
-  # display_markers
-  # display_board(board)
+  display_scores(scores)
+  display_board(board)
 end
 
-# Board { 1 => " ", 2 => " ", 3 => " ",
-#         4 => " ", 5 => " ", 6 => " ",
-#         7 => " ", 8 => " ", 9 => " " }
-def create_board
-  (1..(BOARD_LENGTH**2)).map { |int| [int, int.to_s] }.to_h
+def display_scores(scores)
+  prompt("Player (#{PLAYER_MARKER}): #{scores[:player]}; CPU (#{CPU_MARKER}): #{scores[:cpu]}")
 end
 
 def display_board(board)
-  system 'clear'
-  prompt("You are #{PLAYER_MARKER}; Computer is #{CPU_MARKER}.")
-
   board.each do |key, value|
     separator = (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
     print " #{value} "
@@ -75,6 +62,17 @@ def display_board(board)
   end
   puts "\n"
 end
+
+# Board:
+# { 1 => " ", 2 => " ", 3 => " ",
+#   4 => " ", 5 => " ", 6 => " ",
+#   7 => " ", 8 => " ", 9 => " " }
+def create_board
+  (1..(BOARD_LENGTH**2)).map { |int| [int, int.to_s] }.to_h
+end
+
+
+
 
 def empty_squares(board)
   board.keys.reject { |key| [PLAYER_MARKER, CPU_MARKER].include?(board[key]) }
@@ -203,7 +201,7 @@ end
 
 
 
-
+# FIX GAME LOOP SEQUENCE NEXT.
 
 
 name = prompt_name
@@ -211,8 +209,7 @@ PLAYER_MARKER, CPU_MARKER = choose_marker
 
 # New Series (Bo9)
 loop do
-  player_wins = 0
-  computer_wins = 0
+  scores = { player: 0, cpu: 0 }
 
   # New Game
   loop do
@@ -220,14 +217,16 @@ loop do
 
     # New Turn
     loop do
-      display_board(board)
+      display_game(board, scores)
   
       player_move(board)
       break if winner?(board) || tie?(board)
       computer_move(board)
       break if winner?(board) || tie?(board)
     end
-    display_board(board)
+
+
+    display_game(board, scores)
 
     if winner?(board)
       prompt("#{find_winner(board)} wins!")
@@ -237,11 +236,11 @@ loop do
 
     
     
-    player_wins += 1 if find_winner(board) == 'Player'
-    computer_wins += 1 if find_winner(board) == 'Computer'
+    scores[:player] += 1 if find_winner(board) == 'Player'
+    scores[:cpu] += 1 if find_winner(board) == 'Computer'
 
-    break if player_wins == 5 || computer_wins == 5
-    prompt("Player: #{player_wins}; Computer: #{computer_wins}")
+    break if scores[:player] == 5 || scores[:cpu] == 5
+    #prompt("Player: #{player_wins}; Computer: #{computer_wins}")
     prompt("Press any key to continue:")
     STDIN.getch
   end
