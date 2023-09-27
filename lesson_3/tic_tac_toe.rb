@@ -120,8 +120,75 @@ def valid_move?(move, board)
 end
 
 def cpu_move(board)
-  empty_squares(board).sample
+  empty_squares = empty_squares(board)
+  # Return an integer representing the CPU's choice of move.
+
+  # Priority hierarchy for CPU Moves:
+  # 1) Squares that will result in victory if filled by the cpu (offense)
+  defense_priority = cpu_defense(board).sample
+  #offense_priority = cpu_offense(board).sample
+  #binding.pry
+  defense_priority || empty_squares.find { |sq| sq == 5 } || empty_squares.sample
+  
+  # 2) Squares that will result in defeat if filled by the player (defense)
+  # 3) Square #5 (only if empty)
+  # 4) Random square from the unoccupied squares
 end
+
+def cpu_defense(board)
+  empty_squares(board).select do |square|
+    wincons = find_wincons(board).select { |line| line.include?(square) }
+    wincons.any? { |line| board.values_at(*line).count(PLAYER_MARKER) == 2 }
+  end
+end
+
+# CPU AI Defense:
+# If there is a wincon line that is 'at risk', prioritize that square.
+#   'At risk': A line (array of 3 squares) that contains 2 PLAYER MARKERs and 1 empty marker
+# eg.
+# { 1 => "X", 2 => "2", 3 => "X",
+#   4 => " ", 5 => " ", 6 => " ",
+#   7 => " ", 8 => " ", 9 => " " }
+# Line [1, 2, 3] is considered at risk because X |  | X -> Player can win by selecting 2.
+
+# Input:
+# Hash representing the board.
+# Output: An Array containing all the integers that represent a square that is 'at risk'
+# eg.
+# { 1 => " ", 2 => "O", 3 => "X",
+#   4 => "O", 5 => "X", 6 => "X",
+#   7 => " ", 8 => " ", 9 => " " } => [7, 9]
+
+# Data: 
+#   Hash representing board
+#   Array being returned
+#   Nested array returned by find wincons [[1, 2, 3], [4, 5, 6], [7, 8, 9],
+#                                          [1, 4, 7], [2, 5, 8], [3, 6, 9],
+#                                          [1, 5, 9], [3, 5, 7]]
+
+# alt.
+# Iterate through the empty squares array. For each square:
+#   Check if it is at risk and needs to be defended:
+#     - Select all subarrays from wincons that contain the current square 
+#     eg. square = 1; [[1, 2, 3], [1, 4, 7], [1, 5, 9]
+#     - Iterate through each wincon and determine if any of them are 'at risk':
+#       - If the current wincon subarray contains 2 player-marked squares, it is at risk (the 3rd one must necessarily be empty) 
+#       => Add the current square to the returning array.
+#   Return the result array
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def increment_score(scores, winner)
   return if winner.nil?
@@ -150,6 +217,7 @@ def find_winner(board)
   nil
 end
 
+# REFACTOR FIND WINCONS - save wincons into a constant, based only on the board size constant.
 def find_wincons(board)
   board_length = Math.sqrt(board.size).to_i
 
