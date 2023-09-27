@@ -176,33 +176,45 @@ def play_again?
   end
 end
 
-# Ask for name
-
-# Enter Loop
-# Bo9
-# You and the computer will be playing a best of 9 series - first to 5 wins! 
-# You: 0  Computer: 0
-
-# After each game - depending on who won, increment the appropriate 
-# counter. If it was a tie, do not increment either.
-#   After incrementing, check if either the player or computer is at 5 wins 
-#   If player is at 5 wins, output "Player wins!" and prompt to play again
-#   If computer is at 5 wins output 'computer wins' and prompt to play again
-
-# 1) Welcome and ask for name
-# 2) New Round: Best of 9.
-#   - Reset player and computer wins to 0.
-#   - Start a New Game
-#   3) New Game:
-#     - Create a new board
-#     - Start a New Turn
-#     4) New Turn: 
-#     - Display the board
 
 
 
 # FIX GAME LOOP SEQUENCE NEXT.
+# Start program:
+# -ask for name 
+# -ask for marker choice
+# 1) Start a new SERIES (best of 9).
+#   => Reset scores to 0
+#   => Start a new GAME (single game)
+# 2) Create a new board for the new game
+#   - Start the game:
+# 3) Display the board (and scores)
+# - Set the current_marker to PLAYER MARKER
+# - Get the current player's move
+# - Mark the board with the current player's marker (mark_board!)?
 
+# 4) Check for a win/tie - break game loop if there is a win or tie
+#   - if not, switch the current player
+
+# 5) When the game loop is broken: 
+# - Increment the scores accordingly
+# - Display the game board
+# - Display who won the round (/if it was a tie)
+
+# 6) Check if the SERIES loop should be broken: 
+# - Check if either player or cpu score is equal to 5.
+# - If the loop is not broken, press any key to continue => next game of series
+
+# 7) When the SERIES loop is broken:
+# - Determine who the series winner was (should be the current player; alternatively, whoever has the higher score (max by score))
+# - Display the winner and score by which they won
+# - Ask if want play again? => Start new series
+#   - if not: goodbye
+
+
+
+# "Get the current player's move"
+#   Given a board and a ? representing the current player (player or cpu?)
 
 name = prompt_name
 PLAYER_MARKER, CPU_MARKER = choose_marker
@@ -240,7 +252,7 @@ loop do
     scores[:cpu] += 1 if find_winner(board) == 'Computer'
 
     break if scores[:player] == 5 || scores[:cpu] == 5
-    #prompt("Player: #{player_wins}; Computer: #{computer_wins}")
+
     prompt("Press any key to continue:")
     STDIN.getch
   end
