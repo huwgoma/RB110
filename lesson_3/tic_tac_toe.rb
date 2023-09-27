@@ -2,11 +2,9 @@
 require 'io/console'
 require 'pry'
 
-PLAYER_MARKER = 'X'
-COMPUTER_MARKER = 'O'
 BOARD_LENGTH = 3
 
-# Game Display
+# Game Prompts
 def prompt(str)
   puts ">> #{str}"
 end
@@ -32,15 +30,26 @@ def joinor(array, separator=', ', last_separator='or')
   end
 end
 
+def choose_marker
+  prompt("Which marker would you like to play as? (X or O)")
+
+  marker = nil
+  loop do
+    marker = gets.chomp.upcase
+    break if ['X', 'O'].include?(marker)
+    prompt("Invalid input - Please choose either X or O.")
+  end
+  unused_marker = marker == 'X' ? 'O' : 'X'  
+  [marker, unused_marker]
+end
+
+
+# Board
+
 # Maybe a generalized display method:
 # - Display overall round count (player 1 computer 0)
 # - Display who's what marker (player X computer O)
 # - Display board.
-
-
-# Game: Single round
-# Series: 
-
 def display_game(board)
   system('clear')
   # display_score(score_a, score_b)
@@ -57,7 +66,7 @@ end
 
 def display_board(board)
   system 'clear'
-  prompt("You are #{PLAYER_MARKER}; Computer is #{COMPUTER_MARKER}.")
+  prompt("You are #{PLAYER_MARKER}; Computer is #{CPU_MARKER}.")
 
   board.each do |key, value|
     separator = (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
@@ -68,7 +77,7 @@ def display_board(board)
 end
 
 def empty_squares(board)
-  board.keys.reject { |key| [PLAYER_MARKER, COMPUTER_MARKER].include?(board[key]) }
+  board.keys.reject { |key| [PLAYER_MARKER, CPU_MARKER].include?(board[key]) }
 end
 
 # Piece Placement
@@ -92,7 +101,7 @@ end
 # Computer Move
 def computer_move(board)
   square = empty_squares(board).sample
-  board[square] = COMPUTER_MARKER if square
+  board[square] = CPU_MARKER if square
 end
 
 # Game Outcome Logic
@@ -112,7 +121,7 @@ def find_winner(board)
 
   line_values.each do |line|
     return 'Player' if line.all? { |square| square == PLAYER_MARKER }
-    return 'Computer' if line.all? { |square| square == COMPUTER_MARKER }
+    return 'Computer' if line.all? { |square| square == CPU_MARKER }
   end
   nil
 end
@@ -198,6 +207,7 @@ end
 
 
 name = prompt_name
+PLAYER_MARKER, CPU_MARKER = choose_marker
 
 # New Series (Bo9)
 loop do
