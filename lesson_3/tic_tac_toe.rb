@@ -63,6 +63,16 @@ def display_board(board)
   puts "\n"
 end
 
+def display_game_result(winner) # string or nil
+  if winner == 'Player'
+    prompt("You win! :)")
+  elsif winner == 'CPU'
+    prompt("Computer wins :(")
+  else
+    prompt("It's a tie!")
+  end
+end
+
 # Board:
 # { 1 => " ", 2 => " ", 3 => " ",
 #   4 => " ", 5 => " ", 6 => " ",
@@ -71,14 +81,11 @@ def create_board
   (1..(BOARD_LENGTH**2)).map { |int| [int, int.to_s] }.to_h
 end
 
-
-
-
 def empty_squares(board)
   board.keys.reject { |key| [PLAYER_MARKER, CPU_MARKER].include?(board[key]) }
 end
 
-# Piece Placement
+# Game Functions
 def place_piece!(board, marker)
   move = if marker == PLAYER_MARKER
     player_move(board)
@@ -104,6 +111,11 @@ end
 
 def cpu_move(board)
   empty_squares(board).sample
+end
+
+def increment_score(scores, winner)
+  return if winner.nil?
+  scores[winner.downcase.to_sym] += 1
 end
 
 # Win-Finding Logic
@@ -197,27 +209,16 @@ loop do
       break if winner?(board) || tie?(board)
       current_marker, next_marker = next_marker, current_marker
     end
-
+    winner = find_winner(board) # string or nil (if tie)
+    increment_score(scores, winner)
+    display_game(board, scores)
+    display_game_result(winner)
+    binding.pry
+    # display the game result
   end
 end
 
 
-# FIX GAME LOOP SEQUENCE NEXT.
-# Start program:
-# -ask for name 
-# -ask for marker choice
-# 1) Start a new SERIES (best of 9).
-#   => Reset scores to 0
-#   => Start a new GAME (single game)
-# 2) Create a new board for the new game
-#   - Start the game:
-# 3) Display the board (and scores)
-# - Set the current_marker to PLAYER MARKER
-# - Get the current player's move
-# - Mark the board with the current player's marker (mark_board!)?
-
-# 4) Check for a win/tie - break game loop if there is a win or tie
-#   - if not, switch the current player
 
 # 5) When the game loop is broken: 
 # - Increment the scores accordingly
@@ -284,3 +285,22 @@ end
 # end
 
 # puts "Thanks for playing!"
+
+
+
+# FIX GAME LOOP SEQUENCE NEXT.
+# Start program:
+# -ask for name 
+# -ask for marker choice
+# 1) Start a new SERIES (best of 9).
+#   => Reset scores to 0
+#   => Start a new GAME (single game)
+# 2) Create a new board for the new game
+#   - Start the game:
+# 3) Display the board (and scores)
+# - Set the current_marker to PLAYER MARKER
+# - Get the current player's move
+# - Mark the board with the current player's marker (mark_board!)?
+
+# 4) Check for a win/tie - break game loop if there is a win or tie
+#   - if not, switch the current player
