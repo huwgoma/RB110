@@ -79,30 +79,34 @@ def empty_squares(board)
 end
 
 # Piece Placement
+def place_piece!(board, marker)
+  move = if marker == PLAYER_MARKER
+    player_move(board)
+  elsif marker == CPU_MARKER
+    cpu_move(board)
+  end
+  board[move] = marker #if marker
+end
+
 def player_move(board)
-  input = ''
   loop do
     prompt("Pick an empty square (#{joinor(empty_squares(board))}):")
     input = gets.chomp
 
-    break if valid_move?(input, board)
+    return input.to_i if valid_move?(input, board)
     prompt("Sorry, that's not a valid choice.")
   end
-  board[input.to_i] = PLAYER_MARKER
 end
 
 def valid_move?(move, board)
-  move.to_i.between?(1, board.size) &&
-    empty_squares(board).include?(move.to_i)
+  empty_squares(board).include?(move.to_i)
 end
 
-# Computer Move
-def computer_move(board)
-  square = empty_squares(board).sample
-  board[square] = CPU_MARKER if square
+def cpu_move(board)
+  empty_squares(board).sample
 end
 
-# Game Outcome Logic
+# Win-Finding Logic
 def tie?(board)
   empty_squares(board).empty?
 end
@@ -119,7 +123,7 @@ def find_winner(board)
 
   line_values.each do |line|
     return 'Player' if line.all? { |square| square == PLAYER_MARKER }
-    return 'Computer' if line.all? { |square| square == CPU_MARKER }
+    return 'CPU' if line.all? { |square| square == CPU_MARKER }
   end
   nil
 end
@@ -176,7 +180,25 @@ def play_again?
   end
 end
 
-
+# Main Loop
+name = prompt_name
+PLAYER_MARKER, CPU_MARKER = choose_marker
+# Series (Bo9)
+loop do
+  scores = { player: 0, cpu: 0 }
+  # Game
+  loop do
+    board = create_board
+    current_marker = PLAYER_MARKER
+    # Turn(s)
+    loop do
+      display_game(board, scores)
+      place_piece!(board, current_marker)
+    end
+    
+    
+  end
+end
 
 
 # FIX GAME LOOP SEQUENCE NEXT.
@@ -213,54 +235,51 @@ end
 
 
 
-# "Get the current player's move"
-#   Given a board and a ? representing the current player (player or cpu?)
 
-name = prompt_name
-PLAYER_MARKER, CPU_MARKER = choose_marker
+
 
 # New Series (Bo9)
-loop do
-  scores = { player: 0, cpu: 0 }
+# loop do
+#   scores = { player: 0, cpu: 0 }
 
-  # New Game
-  loop do
-    board = create_board
+#   # New Game
+#   loop do
+#     board = create_board
 
-    # New Turn
-    loop do
-      display_game(board, scores)
+#     # New Turn
+#     loop do
+#       display_game(board, scores)
   
-      player_move(board)
-      break if winner?(board) || tie?(board)
-      computer_move(board)
-      break if winner?(board) || tie?(board)
-    end
+#       player_move(board)
+#       break if winner?(board) || tie?(board)
+#       computer_move(board)
+#       break if winner?(board) || tie?(board)
+#     end
 
 
-    display_game(board, scores)
+#     display_game(board, scores)
 
-    if winner?(board)
-      prompt("#{find_winner(board)} wins!")
-    else
-      prompt("It's a tie!")
-    end
+#     if winner?(board)
+#       prompt("#{find_winner(board)} wins!")
+#     else
+#       prompt("It's a tie!")
+#     end
 
     
     
-    scores[:player] += 1 if find_winner(board) == 'Player'
-    scores[:cpu] += 1 if find_winner(board) == 'Computer'
+#     scores[:player] += 1 if find_winner(board) == 'Player'
+#     scores[:cpu] += 1 if find_winner(board) == 'Computer'
 
-    break if scores[:player] == 5 || scores[:cpu] == 5
+#     break if scores[:player] == 5 || scores[:cpu] == 5
 
-    prompt("Press any key to continue:")
-    STDIN.getch
-  end
+#     prompt("Press any key to continue:")
+#     STDIN.getch
+#   end
 
-  puts 'Player wins!' if player_wins == 5 # Player wins 5-0!
-  puts 'Computer wins!' if computer_wins == 5 
+#   puts 'Player wins!' if player_wins == 5 # Player wins 5-0!
+#   puts 'Computer wins!' if computer_wins == 5 
 
-  break unless play_again?
-end
+#   break unless play_again?
+# end
 
-puts "Thanks for playing!"
+# puts "Thanks for playing!"
