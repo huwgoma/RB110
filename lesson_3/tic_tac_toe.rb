@@ -189,14 +189,15 @@ loop do
   # Game
   loop do
     board = create_board
-    current_marker = PLAYER_MARKER
+    current_marker, next_marker = PLAYER_MARKER, CPU_MARKER
     # Turn(s)
     loop do
       display_game(board, scores)
       place_piece!(board, current_marker)
+      break if winner?(board) || tie?(board)
+      current_marker, next_marker = next_marker, current_marker
     end
-    
-    
+
   end
 end
 
