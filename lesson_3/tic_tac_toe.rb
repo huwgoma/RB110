@@ -1,13 +1,23 @@
 # Tic Tac Toe
+require 'io/console'
 require 'pry'
 
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 BOARD_LENGTH = 3
 
-# Game Messages
+# Game Display
 def prompt(str)
   puts ">> #{str}"
+end
+
+def prompt_name
+  prompt("Hello! What's your name?")
+  loop do
+    name = gets.chomp
+    return name unless name.strip.empty?
+    prompt("Please enter a non-empty name :)")
+  end
 end
 
 def joinor(array, separator=', ', last_separator='or')
@@ -22,6 +32,22 @@ def joinor(array, separator=', ', last_separator='or')
   end
 end
 
+# Maybe a generalized display method:
+# - Display overall round count (player 1 computer 0)
+# - Display who's what marker (player X computer O)
+# - Display board.
+
+
+# Game: Single round
+# Series: 
+
+def display_game(board)
+  system('clear')
+  # display_score(score_a, score_b)
+  # display_markers
+  # display_board(board)
+end
+
 # Board { 1 => " ", 2 => " ", 3 => " ",
 #         4 => " ", 5 => " ", 6 => " ",
 #         7 => " ", 8 => " ", 9 => " " }
@@ -34,10 +60,9 @@ def display_board(board)
   prompt("You are #{PLAYER_MARKER}; Computer is #{COMPUTER_MARKER}.")
 
   board.each do |key, value|
+    separator = (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
     print " #{value} "
-    if key < board.size
-      print (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
-    end
+    print separator if key < board.size
   end
   puts "\n"
 end
@@ -46,7 +71,7 @@ def empty_squares(board)
   board.keys.reject { |key| [PLAYER_MARKER, COMPUTER_MARKER].include?(board[key]) }
 end
 
-# Player Move
+# Piece Placement
 def player_move(board)
   input = ''
   loop do
@@ -144,24 +169,75 @@ def play_again?
   end
 end
 
-loop do
-  board = create_board
+# Ask for name
 
+# Enter Loop
+# Bo9
+# You and the computer will be playing a best of 9 series - first to 5 wins! 
+# You: 0  Computer: 0
+
+# After each game - depending on who won, increment the appropriate 
+# counter. If it was a tie, do not increment either.
+#   After incrementing, check if either the player or computer is at 5 wins 
+#   If player is at 5 wins, output "Player wins!" and prompt to play again
+#   If computer is at 5 wins output 'computer wins' and prompt to play again
+
+# 1) Welcome and ask for name
+# 2) New Round: Best of 9.
+#   - Reset player and computer wins to 0.
+#   - Start a New Game
+#   3) New Game:
+#     - Create a new board
+#     - Start a New Turn
+#     4) New Turn: 
+#     - Display the board
+
+
+
+
+
+
+name = prompt_name
+
+# New Series (Bo9)
+loop do
+  player_wins = 0
+  computer_wins = 0
+
+  # New Game
   loop do
+    board = create_board
+
+    # New Turn
+    loop do
+      display_board(board)
+  
+      player_move(board)
+      break if winner?(board) || tie?(board)
+      computer_move(board)
+      break if winner?(board) || tie?(board)
+    end
     display_board(board)
 
-    player_move(board)
-    break if winner?(board) || tie?(board)
-    computer_move(board)
-    break if winner?(board) || tie?(board)
-  end
-  display_board(board)
+    if winner?(board)
+      prompt("#{find_winner(board)} wins!")
+    else
+      prompt("It's a tie!")
+    end
 
-  if winner?(board)
-    prompt("#{find_winner(board)} wins!")
-  else
-    prompt("It's a tie!")
+    
+    
+    player_wins += 1 if find_winner(board) == 'Player'
+    computer_wins += 1 if find_winner(board) == 'Computer'
+
+    break if player_wins == 5 || computer_wins == 5
+    prompt("Player: #{player_wins}; Computer: #{computer_wins}")
+    prompt("Press any key to continue:")
+    STDIN.getch
   end
+
+  puts 'Player wins!' if player_wins == 5 # Player wins 5-0!
+  puts 'Computer wins!' if computer_wins == 5 
 
   break unless play_again?
 end
