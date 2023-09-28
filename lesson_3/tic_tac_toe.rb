@@ -56,7 +56,7 @@ def display_game(board, scores)
 end
 
 def display_scores(scores)
-  prompt("Player (#{PLAYER_MARKER}): #{scores['player']}; CPU (#{CPU_MARKER}): #{scores['cpu']}")
+  prompt("Player (#{PLAYER_MARKER}): #{scores['Player']}; CPU (#{CPU_MARKER}): #{scores['CPU']}")
 end
 
 def display_board(board)
@@ -78,9 +78,8 @@ def display_game_result(winner) # string or nil
   end
 end
 
-# Investigate why series winner is always the player?
 def display_series_result(scores)
-  winner = scores.max[0].capitalize
+  winner = scores.max_by {|_k, v| v }.first
   prompt("#{winner} wins with a score of #{scores.max[1]}-#{scores.min[1]}!")
 end
 
@@ -136,7 +135,7 @@ end
 
 def increment_score(scores, winner)
   return if winner.nil?
-  scores[winner.downcase] += 1
+  scores[winner] += 1
 end
 
 # Win-Finding Logic
@@ -208,7 +207,7 @@ display_rules
 PLAYER_MARKER, CPU_MARKER = choose_marker
 # Series (Bo9)
 loop do
-  scores = { 'player' => 0, 'cpu' => 0 }
+  scores = { 'Player' => 0, 'CPU' => 0 }
 
   # Game
   loop do
