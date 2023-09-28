@@ -2,7 +2,6 @@
 require 'io/console'
 require 'pry'
 
-BOARD_LENGTH = 3
 
 # Game Prompts
 def prompt(str)
@@ -239,46 +238,48 @@ def find_winner(board)
   nil
 end
 
+BOARD_LENGTH = 3 
 # REFACTOR FIND WINCONS - save wincons into a constant, based only on the board size constant.
 def find_wincons(board)
-  board_length = Math.sqrt(board.size).to_i
+  #board_length = Math.sqrt(board.size).to_i
 
-  row_wincons = find_row_wincons(board, board_length)
-  column_wincons = find_column_wincons(board, board_length)
-  diagonal_wincons = find_diagonal_wincons(board, board_length)
+  row_wincons = find_row_wincons(BOARD_LENGTH)
+  binding.pry
+  column_wincons = find_column_wincons(BOARD_LENGTH)
+  diagonal_wincons = find_diagonal_wincons(BOARD_LENGTH)
+  binding.pry
   row_wincons + column_wincons + diagonal_wincons
 end
 
-def find_row_wincons(board, length)
-  # Can also just use the #each_slice method but I wanted to do it without method hunting
+def find_row_wincons(length)
+  # Can also use #each_slice to divide the [1..9] array into slices of 3-element subarrays
+  row_origins = (1..(length ** 2)).select { |int| (int - 1) % length == 0 }
 
-  row_start_squares = board.keys.select.with_index { |_square, index| (index % length).zero? }
-
-  row_start_squares.map do |square|
-    winning_row = [square]
-    winning_row << square += 1 until winning_row.size == length
-    winning_row
+  row_origins.map do |square|
+    wincon = [square]
+    wincon << square += 1 until wincon.size == length
+    wincon
   end
 end
 
 def find_column_wincons(board, length)
-  column_start_squares = board.keys.first(length)
+  column_origins = board.keys.first(length)
 
-  column_start_squares.map do |square|
-    winning_column = [square]
-    winning_column << square += length until winning_column.size == length
-    winning_column
+  column_origins.map do |square|
+    wincon = [square]
+    wincon << square += length until wincon.size == length
+    wincon
   end
 end
 
 def find_diagonal_wincons(board, length)
-  diagonal_start_squares = [board.keys.first, board.keys[length - 1]]
+  diagonal_origins = [board.keys.first, board.keys[length - 1]]
 
-  diagonal_start_squares.map.with_index do |square, index|
-    winning_diagonal = [square]
+  diagonal_origins.map.with_index do |square, index|
+    wincon = [square]
     increment = index.even? ? length + 1 : length - 1
-    winning_diagonal << square += increment until winning_diagonal.size == length
-    winning_diagonal
+    wincon << square += increment until wincon.size == length
+    wincon
   end
 end
 
