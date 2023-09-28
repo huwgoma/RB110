@@ -2,6 +2,7 @@
 require 'io/console'
 require 'pry'
 
+BOARD_LENGTH = 3 
 
 # Game Prompts
 def prompt(str)
@@ -125,7 +126,7 @@ def cpu_move(board)
   # Priority hierarchy for CPU Moves:
   # 1) Squares that will result in victory if filled by the cpu (offense)
   defense_priority = find_cpu_priorities(board, PLAYER_MARKER).sample
-  binding.pry
+  #binding.pry
   offense_priority = find_cpu_priorities(board, CPU_MARKER).sample
   
   defense_priority || empty_squares.find { |sq| sq == 5 } || empty_squares.sample
@@ -140,75 +141,10 @@ end
 #   occupied by 2 of the same marker.
 
 def find_cpu_priorities(board, marker)
-  wincons = find_wincons(board)
-
   empty_squares(board).select do |square|
-    wincons.select { |line| line.include?(square) }.any? { |line| board.values_at(*line).count(marker) == 2 }
-  end
-  
-  # Iterate through winconditions arrays. For each subarray:
-  # Retrieve the corresponding values in the board hash. 
-  # If the current subarray contains 2 markers of the same type, and 1 square included in empty squares, it is at risk
-
-  
-end
-
-
-
-def cpu_defense(board)
-  empty_squares(board).select do |square|
-    wincons = find_wincons(board).select { |line| line.include?(square) }
-   
-    wincons.any? { |line| board.values_at(*line).count(PLAYER_MARKER) == 2 }
+    WIN_CONDITIONS.select { |line| line.include?(square) }.any? { |line| board.values_at(*line).count(marker) == 2 }
   end
 end
-
-# CPU AI Defense:
-# If there is a wincon line that is 'at risk', prioritize that square.
-#   'At risk': A line (array of 3 squares) that contains 2 PLAYER MARKERs and 1 empty marker
-# eg.
-# { 1 => "X", 2 => "2", 3 => "X",
-#   4 => " ", 5 => " ", 6 => " ",
-#   7 => " ", 8 => " ", 9 => " " }
-# Line [1, 2, 3] is considered at risk because X |  | X -> Player can win by selecting 2.
-
-# Input:
-# Hash representing the board.
-# Output: An Array containing all the integers that represent a square that is 'at risk'
-# eg.
-# { 1 => " ", 2 => "O", 3 => "X",
-#   4 => "O", 5 => "X", 6 => "X",
-#   7 => " ", 8 => " ", 9 => " " } => [7, 9]
-
-# Data: 
-#   Hash representing board
-#   Array being returned
-#   Nested array returned by find wincons [[1, 2, 3], [4, 5, 6], [7, 8, 9],
-#                                          [1, 4, 7], [2, 5, 8], [3, 6, 9],
-#                                          [1, 5, 9], [3, 5, 7]]
-
-# alt.
-# Iterate through the empty squares array. For each square:
-#   Check if it is at risk and needs to be defended:
-#     - Select all subarrays from wincons that contain the current square 
-#     eg. square = 1; [[1, 2, 3], [1, 4, 7], [1, 5, 9]
-#     - Iterate through each wincon and determine if any of them are 'at risk':
-#       - If the current wincon subarray contains 2 player-marked squares, it is at risk (the 3rd one must necessarily be empty) 
-#       => Add the current square to the returning array.
-#   Return the result array
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def increment_score(scores, winner)
@@ -226,10 +162,8 @@ def winner?(board)
 end
 
 def find_winner(board)
-  win_conditions = find_wincons(board)
-
   # Splat operator (*) passes in each element of `line` as an argument to #values_at
-  line_values = win_conditions.map { |line| board.values_at(*line) }
+  line_values = WIN_CONDITIONS.map { |line| board.values_at(*line) }
 
   line_values.each do |line|
     return 'Player' if line.all? { |square| square == PLAYER_MARKER }
@@ -238,32 +172,19 @@ def find_winner(board)
   nil
 end
 
-BOARD_LENGTH = 3 
-# REFACTOR FIND WINCONS - save wincons into a constant, based only on the board size constant.
-def find_wincons(board)
-  #board_length = Math.sqrt(board.size).to_i
-
-  row_wincons = find_row_wincons(BOARD_LENGTH)
-  binding.pry
-  column_wincons = find_column_wincons(BOARD_LENGTH)
-  diagonal_wincons = find_diagonal_wincons(BOARD_LENGTH)
-  binding.pry
+def calculate_wincons
+  row_wincons = calculate_row_wincons(BOARD_LENGTH)
+  column_wincons = calculate_column_wincons(BOARD_LENGTH)
+  diagonal_wincons = calculate_diagonal_wincons(BOARD_LENGTH)
   row_wincons + column_wincons + diagonal_wincons
 end
 
-def find_row_wincons(length)
-  # Can also use #each_slice to divide the [1..9] array into slices of 3-element subarrays
-  row_origins = (1..(length ** 2)).select { |int| (int - 1) % length == 0 }
-
-  row_origins.map do |square|
-    wincon = [square]
-    wincon << square += 1 until wincon.size == length
-    wincon
-  end
+def calculate_row_wincons(length)
+  (1..(length ** 2)).each_slice(length).to_a
 end
 
-def find_column_wincons(board, length)
-  column_origins = board.keys.first(length)
+def calculate_column_wincons(length)
+  column_origins = Array(1..length) 
 
   column_origins.map do |square|
     wincon = [square]
@@ -272,10 +193,11 @@ def find_column_wincons(board, length)
   end
 end
 
-def find_diagonal_wincons(board, length)
-  diagonal_origins = [board.keys.first, board.keys[length - 1]]
+def calculate_diagonal_wincons(length)
+  diagonal_origins = [1, length]
 
   diagonal_origins.map.with_index do |square, index|
+    binding.pry
     wincon = [square]
     increment = index.even? ? length + 1 : length - 1
     wincon << square += increment until wincon.size == length
@@ -294,10 +216,10 @@ def play_again?
 end
 
 # Main Loop
-# name = prompt_name ??
+WIN_CONDITIONS = calculate_wincons
+
 display_rules
 PLAYER_MARKER, CPU_MARKER = choose_marker
-
 # Series (Bo9)
 loop do
   scores = { 'player' => 0, 'cpu' => 0 }
