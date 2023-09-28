@@ -78,6 +78,7 @@ def display_game_result(winner) # string or nil
   end
 end
 
+# Investigate why series winner is always the player?
 def display_series_result(scores)
   winner = scores.max[0].capitalize
   prompt("#{winner} wins with a score of #{scores.max[1]}-#{scores.min[1]}!")
@@ -121,31 +122,17 @@ end
 
 def cpu_move(board)
   empty_squares = empty_squares(board)
-  # Return an integer representing the CPU's choice of move.
-
-  # Priority hierarchy for CPU Moves:
-  # 1) Squares that will result in victory if filled by the cpu (offense)
   defense_priority = find_cpu_priorities(board, PLAYER_MARKER).sample
-  #binding.pry
   offense_priority = find_cpu_priorities(board, CPU_MARKER).sample
-  
-  defense_priority || empty_squares.find { |sq| sq == 5 } || empty_squares.sample
-  
-  # 2) Squares that will result in defeat if filled by the player (defense)
-  # 3) Square #5 (only if empty)
-  # 4) Random square from the unoccupied squares
+  offense_priority || defense_priority || 
+    empty_squares.find { |sq| sq == 5 } || empty_squares.sample
 end
-
-# Method that takes a board Hash and a marker type 
-# - Returns an array of integers representing all empty squares in the board whose (win condition) neighbouring squares are 
-#   occupied by 2 of the same marker.
 
 def find_cpu_priorities(board, marker)
   empty_squares(board).select do |square|
     WIN_CONDITIONS.select { |line| line.include?(square) }.any? { |line| board.values_at(*line).count(marker) == 2 }
   end
 end
-
 
 def increment_score(scores, winner)
   return if winner.nil?
@@ -197,7 +184,6 @@ def calculate_diagonal_wincons(length)
   diagonal_origins = [1, length]
 
   diagonal_origins.map.with_index do |square, index|
-    binding.pry
     wincon = [square]
     increment = index.even? ? length + 1 : length - 1
     wincon << square += increment until wincon.size == length
