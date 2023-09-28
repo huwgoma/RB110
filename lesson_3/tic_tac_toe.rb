@@ -98,14 +98,14 @@ end
 # Game Functions
 def place_piece!(board, marker)
   move = if marker == PLAYER_MARKER
-    player_move(board)
+    prompt_player_move(board)
   elsif marker == CPU_MARKER
     cpu_move(board)
   end
   board[move] = marker #if marker
 end
 
-def player_move(board)
+def prompt_player_move(board)
   loop do
     prompt("Pick an empty square (#{joinor(empty_squares(board))}):")
     input = gets.chomp
@@ -125,9 +125,10 @@ def cpu_move(board)
 
   # Priority hierarchy for CPU Moves:
   # 1) Squares that will result in victory if filled by the cpu (offense)
-  defense_priority = cpu_defense(board).sample
-  #offense_priority = cpu_offense(board).sample
-  #binding.pry
+  defense_priority = find_cpu_priorities(board, PLAYER_MARKER).sample
+  binding.pry
+  offense_priority = find_cpu_priorities(board, CPU_MARKER).sample
+  
   defense_priority || empty_squares.find { |sq| sq == 5 } || empty_squares.sample
   
   # 2) Squares that will result in defeat if filled by the player (defense)
@@ -135,9 +136,30 @@ def cpu_move(board)
   # 4) Random square from the unoccupied squares
 end
 
+# Method that takes a board Hash and a marker type 
+# - Returns an array of integers representing all empty squares in the board whose (win condition) neighbouring squares are 
+#   occupied by 2 of the same marker.
+
+def find_cpu_priorities(board, marker)
+  wincons = find_wincons(board)
+
+  empty_squares(board).select do |square|
+    wincons.select { |line| line.include?(square) }.any? { |line| board.values_at(*line).count(marker) == 2 }
+  end
+  
+  # Iterate through winconditions arrays. For each subarray:
+  # Retrieve the corresponding values in the board hash. 
+  # If the current subarray contains 2 markers of the same type, and 1 square included in empty squares, it is at risk
+
+  
+end
+
+
+
 def cpu_defense(board)
   empty_squares(board).select do |square|
     wincons = find_wincons(board).select { |line| line.include?(square) }
+   
     wincons.any? { |line| board.values_at(*line).count(PLAYER_MARKER) == 2 }
   end
 end
