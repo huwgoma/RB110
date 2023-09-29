@@ -10,6 +10,7 @@ def prompt(str)
 end
 
 def display_rules
+  system("clear")
   prompt("Welcome to Tic Tac Toe!")
   prompt("You will be playing a best-of-9 series against the computer. First to 5 wins!")
 end
@@ -46,6 +47,18 @@ def choose_marker
   end
   unused_marker = marker == 'X' ? 'O' : 'X'  
   [marker, unused_marker]
+end
+
+def choose_marker_order
+  prompt("Who should go first this game? (X or O).")
+  prompt("If you want to let the computer decide, enter anything else.")
+  input = gets.chomp.upcase
+  if [PLAYER_MARKER, CPU_MARKER].include?(input)
+    second_marker = input == PLAYER_MARKER ? CPU_MARKER : PLAYER_MARKER
+    [input, second_marker]
+  else
+    [PLAYER_MARKER, CPU_MARKER].shuffle
+  end
 end
 
 # Game Display
@@ -95,7 +108,7 @@ def empty_squares(board)
   board.keys.reject { |key| [PLAYER_MARKER, CPU_MARKER].include?(board[key]) }
 end
 
-# Game Functions
+# Game Moves
 def place_piece!(board, marker)
   move = if marker == PLAYER_MARKER
     prompt_player_move(board)
@@ -133,12 +146,7 @@ def find_cpu_priorities(board, marker)
   end
 end
 
-def increment_score(scores, winner)
-  return if winner.nil?
-  scores[winner] += 1
-end
-
-# Win-Finding Logic
+# Win-Finding
 def tie?(board)
   empty_squares(board).empty?
 end
@@ -190,6 +198,11 @@ def calculate_diagonal_wincons(length)
   end
 end
 
+def increment_score(scores, winner)
+  return if winner.nil?
+  scores[winner] += 1
+end
+
 # Again?
 def play_again?
   loop do
@@ -205,6 +218,7 @@ WIN_CONDITIONS = calculate_wincons
 
 display_rules
 PLAYER_MARKER, CPU_MARKER = choose_marker
+
 # Series (Bo9)
 loop do
   scores = { 'Player' => 0, 'CPU' => 0 }
@@ -212,7 +226,8 @@ loop do
   # Game
   loop do
     board = create_board
-    current_marker, next_marker = PLAYER_MARKER, CPU_MARKER
+    display_game(board, scores)
+    current_marker, next_marker = choose_marker_order
 
     # Game Turns
     loop do
