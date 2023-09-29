@@ -1,6 +1,5 @@
 # Tic Tac Toe
 require 'io/console'
-require 'pry'
 
 BOARD_LENGTH = 3
 
