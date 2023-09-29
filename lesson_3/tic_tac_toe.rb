@@ -1,8 +1,7 @@
 # Tic Tac Toe
 require 'io/console'
-require 'pry'
 
-BOARD_LENGTH = 3 
+BOARD_LENGTH = 3
 
 # Game Prompts
 def prompt(str)
@@ -11,8 +10,11 @@ end
 
 def display_rules
   system("clear")
-  prompt("Welcome to Tic Tac Toe!")
-  prompt("You will be playing a best-of-9 series against the computer. First to 5 wins!")
+  puts <<-HEREDOC
+Welcome to Tic Tac Toe!
+You'll be playing a best-of-9 series against the CPU.
+First to 5 wins!
+  HEREDOC
 end
 
 def prompt_name
@@ -45,7 +47,7 @@ def choose_marker
     break if ['X', 'O'].include?(marker)
     prompt("Invalid input - Please choose either X or O.")
   end
-  unused_marker = marker == 'X' ? 'O' : 'X'  
+  unused_marker = marker == 'X' ? 'O' : 'X'
   [marker, unused_marker]
 end
 
@@ -69,7 +71,8 @@ def display_game(board, scores)
 end
 
 def display_scores(scores)
-  prompt("Player (#{PLAYER_MARKER}): #{scores['Player']}; CPU (#{CPU_MARKER}): #{scores['CPU']}")
+  prompt("Player (#{PLAYER_MARKER}): #{scores['Player']}
+      CPU (#{CPU_MARKER}): #{scores['CPU']}")
 end
 
 def display_board(board)
@@ -92,7 +95,7 @@ def display_game_result(winner) # string or nil
 end
 
 def display_series_result(scores)
-  winner = scores.max_by {|_k, v| v }.first
+  winner = scores.max_by { |_k, v| v }.first
   prompt("#{winner} wins with a score of #{scores.max[1]}-#{scores.min[1]}!")
 end
 
@@ -111,11 +114,11 @@ end
 # Game Moves
 def place_piece!(board, marker)
   move = if marker == PLAYER_MARKER
-    prompt_player_move(board)
-  elsif marker == CPU_MARKER
-    cpu_move(board)
-  end
-  board[move] = marker #if marker
+           prompt_player_move(board)
+         elsif marker == CPU_MARKER
+           cpu_move(board)
+         end
+  board[move] = marker
 end
 
 def prompt_player_move(board)
@@ -136,13 +139,15 @@ def cpu_move(board)
   empty_squares = empty_squares(board)
   defense_priority = find_cpu_priorities(board, PLAYER_MARKER).sample
   offense_priority = find_cpu_priorities(board, CPU_MARKER).sample
-  offense_priority || defense_priority || 
+
+  offense_priority || defense_priority ||
     empty_squares.find { |sq| sq == 5 } || empty_squares.sample
 end
 
 def find_cpu_priorities(board, marker)
   empty_squares(board).select do |square|
-    WIN_CONDITIONS.select { |line| line.include?(square) }.any? { |line| board.values_at(*line).count(marker) == 2 }
+    filtered_wincons = WIN_CONDITIONS.select { |line| line.include?(square) }
+    filtered_wincons.any? { |line| board.values_at(*line).count(marker) == 2 }
   end
 end
 
@@ -156,7 +161,7 @@ def winner?(board)
 end
 
 def find_winner(board)
-  # Splat operator (*) passes in each element of `line` as an argument to #values_at
+  # * preceding an Array argument passes each element of the Array as individual arguments to the method invocation
   line_values = WIN_CONDITIONS.map { |line| board.values_at(*line) }
 
   line_values.each do |line|
@@ -174,11 +179,11 @@ def calculate_wincons
 end
 
 def calculate_row_wincons(length)
-  (1..(length ** 2)).each_slice(length).to_a
+  (1..(length**2)).each_slice(length).to_a
 end
 
 def calculate_column_wincons(length)
-  column_origins = Array(1..length) 
+  column_origins = Array(1..length)
 
   column_origins.map do |square|
     wincon = [square]
@@ -241,10 +246,10 @@ loop do
     increment_score(scores, winner)
     display_game(board, scores)
     display_game_result(winner)
-    
+
     break if scores.values.any?(5)
     prompt("Press any key to continue:")
-    STDIN.getch
+    $stdin.getch
   end
   display_series_result(scores)
 
