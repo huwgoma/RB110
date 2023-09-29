@@ -1,5 +1,6 @@
 # Tic Tac Toe
 require 'io/console'
+require 'pry'
 
 BOARD_LENGTH = 3
 
@@ -52,7 +53,7 @@ def choose_marker
 end
 
 def choose_marker_order
-  prompt("Who should go first this game? (X or O).")
+  prompt("Who should go first? (X or O).")
   prompt("If you want to let the computer decide, enter anything else.")
   input = gets.chomp.upcase
   if [PLAYER_MARKER, CPU_MARKER].include?(input)
@@ -111,7 +112,7 @@ def empty_squares(board)
   board.keys.reject { |key| [PLAYER_MARKER, CPU_MARKER].include?(board[key]) }
 end
 
-# Game Moves
+# Placing Markers
 def place_piece!(board, marker)
   move = if marker == PLAYER_MARKER
            prompt_player_move(board)
@@ -149,6 +150,10 @@ def find_cpu_priorities(board, marker)
     filtered_wincons = WIN_CONDITIONS.select { |line| line.include?(square) }
     filtered_wincons.any? { |line| board.values_at(*line).count(marker) == 2 }
   end
+end
+
+def switch_markers(marker1, marker2)
+  [marker2, marker1]
 end
 
 # Win-Finding
@@ -218,7 +223,7 @@ def play_again?
   end
 end
 
-# Main Loop
+# Main Program
 WIN_CONDITIONS = calculate_wincons
 
 display_rules
@@ -227,19 +232,17 @@ PLAYER_MARKER, CPU_MARKER = choose_marker
 # Series (Bo9)
 loop do
   scores = { 'Player' => 0, 'CPU' => 0 }
-
+  current_marker, next_marker = choose_marker_order
   # Game
   loop do
     board = create_board
-    display_game(board, scores)
-    current_marker, next_marker = choose_marker_order
 
     # Game Turns
     loop do
       display_game(board, scores)
       place_piece!(board, current_marker)
       break if winner?(board) || tie?(board)
-      current_marker, next_marker = next_marker, current_marker
+      current_marker, next_marker = switch_markers(current_marker, next_marker)
     end
 
     winner = find_winner(board)
@@ -250,6 +253,8 @@ loop do
     break if scores.values.any?(5)
     prompt("Press any key to continue:")
     $stdin.getch
+    # Loser of current game gets to go first next game
+    current_marker, next_marker = switch_markers(current_marker, next_marker)
   end
   display_series_result(scores)
 
