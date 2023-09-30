@@ -1,6 +1,6 @@
 # Tic Tac Toe
 require 'io/console'
-require 'pry'
+
 BOARD_LENGTH = 3
 
 # Game Prompts
@@ -85,12 +85,12 @@ end
 
 def display_board(board)
   cell_size = [3, board.values.max_by(&:to_i).size].max
-  row_separator = "\n#{("---+" * BOARD_LENGTH).chop}\n"
+  row_separator = "\n#{('---+' * BOARD_LENGTH).chop}\n"
   column_separator = "|"
-  
+
   board.each do |key, value|
     separator = (key % BOARD_LENGTH).zero? ? row_separator : column_separator
-    cell = value.center(cell_size, " ")    
+    cell = value.center(cell_size, " ")
     print cell
     print separator if key < board.size
   end
@@ -149,7 +149,7 @@ def cpu_move(board)
   empty_squares = empty_squares(board)
   defense_priority = find_priority_squares(board, PLAYER_MARKER).sample
   offense_priority = find_priority_squares(board, CPU_MARKER).sample
-  center_square = (board.size / 2) + 1 
+  center_square = (board.size / 2) + 1
 
   offense_priority || defense_priority ||
     empty_squares.find { |sq| sq == center_square } || empty_squares.sample
@@ -158,7 +158,9 @@ end
 def find_priority_squares(board, marker)
   empty_squares(board).select do |square|
     filtered_wincons = WIN_CONDITIONS.select { |line| line.include?(square) }
-    filtered_wincons.any? { |line| board.values_at(*line).count(marker) == (BOARD_LENGTH - 1) }
+    filtered_wincons.any? do |line|
+      board.values_at(*line).count(marker) == (BOARD_LENGTH - 1)
+    end
   end
 end
 
