@@ -8,22 +8,30 @@ def prompt(str)
   puts ">> #{str}"
 end
 
-def display_rules
+def display_welcome
   system("clear")
+  prompt("Welcome to Tic Tac Toe!")
+end
+
+def display_rules(max_wins)
+  best_of = (max_wins * 2) - 1
   puts <<-HEREDOC
-Welcome to Tic Tac Toe!
-You'll be playing a best-of-9 series against the CPU.
-First to 5 wins!
+You'll be playing a best-of-#{best_of} series against the CPU.
+First to #{max_wins} wins!
   HEREDOC
 end
 
-def prompt_name
-  prompt("Hello! What's your name?")
+def choose_win_number
   loop do
-    name = gets.chomp
-    return name unless name.strip.empty?
-    prompt("Please enter a non-empty name :)")
+    prompt("How many wins would you like to play up to?")
+    input = gets.chomp
+    return input.to_i if numeric?(input)
+    prompt("Invalid input! Please enter a whole number.")
   end
+end
+
+def numeric?(str)
+  str.to_i.to_s == str
 end
 
 def joinor(array, separator=', ', last_separator='or')
@@ -84,7 +92,7 @@ def display_board(board)
   puts "\n"
 end
 
-def display_game_result(winner) # string or nil
+def display_game_result(winner)
   if winner == 'Player'
     prompt("You win! :)")
   elsif winner == 'CPU'
@@ -99,10 +107,7 @@ def display_series_result(scores)
   prompt("#{winner} wins with a score of #{scores.max[1]}-#{scores.min[1]}!")
 end
 
-# Board:
-# { 1 => " ", 2 => " ", 3 => " ",
-#   4 => " ", 5 => " ", 6 => " ",
-#   7 => " ", 8 => " ", 9 => " " }
+# Board
 def create_board
   (1..(BOARD_LENGTH**2)).map { |int| [int, int.to_s] }.to_h
 end
@@ -137,14 +142,14 @@ end
 
 def cpu_move(board)
   empty_squares = empty_squares(board)
-  defense_priority = find_cpu_priorities(board, PLAYER_MARKER).sample
-  offense_priority = find_cpu_priorities(board, CPU_MARKER).sample
+  defense_priority = find_priority_squares(board, PLAYER_MARKER).sample
+  offense_priority = find_priority_squares(board, CPU_MARKER).sample
 
   offense_priority || defense_priority ||
     empty_squares.find { |sq| sq == 5 } || empty_squares.sample
 end
 
-def find_cpu_priorities(board, marker)
+def find_priority_squares(board, marker)
   empty_squares(board).select do |square|
     filtered_wincons = WIN_CONDITIONS.select { |line| line.include?(square) }
     filtered_wincons.any? { |line| board.values_at(*line).count(marker) == 2 }
@@ -225,7 +230,9 @@ end
 # Main Program
 WIN_CONDITIONS = calculate_wincons
 
-display_rules
+display_welcome
+win_upto = choose_win_number
+display_rules(win_upto)
 PLAYER_MARKER, CPU_MARKER = choose_marker
 
 # Series (Bo9)
@@ -249,7 +256,7 @@ loop do
     display_game(board, scores)
     display_game_result(winner)
 
-    break if scores.values.any?(5)
+    break if scores.values.any?(win_upto)
     prompt("Press any key to continue:")
     $stdin.getch
     # Loser of current game gets to go first next game
