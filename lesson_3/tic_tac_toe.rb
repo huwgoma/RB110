@@ -1,7 +1,7 @@
 # Tic Tac Toe
 require 'io/console'
-
-BOARD_LENGTH = 3
+require 'pry'
+BOARD_LENGTH = 4
 
 # Game Prompts
 def prompt(str)
@@ -84,9 +84,14 @@ def display_scores(scores)
 end
 
 def display_board(board)
+  cell_size = [3, board.values.max_by(&:to_i).size].max
+  row_separator = "\n#{("---+" * BOARD_LENGTH).chop}\n"
+  column_separator = "|"
+  
   board.each do |key, value|
-    separator = (key % BOARD_LENGTH).zero? ? "\n---+---+---\n" : "|"
-    print " #{value} "
+    separator = (key % BOARD_LENGTH).zero? ? row_separator : column_separator
+    cell = value.center(cell_size, " ")    
+    print cell
     print separator if key < board.size
   end
   puts "\n"
@@ -147,6 +152,7 @@ def cpu_move(board)
 
   offense_priority || defense_priority ||
     empty_squares.find { |sq| sq == 5 } || empty_squares.sample
+    # 5 - board size / 2  +1 
 end
 
 def find_priority_squares(board, marker)
