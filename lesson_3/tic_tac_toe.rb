@@ -1,7 +1,7 @@
 # Tic Tac Toe
 require 'io/console'
 require 'pry'
-BOARD_LENGTH = 4
+BOARD_LENGTH = 3
 
 # Game Prompts
 def prompt(str)
@@ -149,16 +149,16 @@ def cpu_move(board)
   empty_squares = empty_squares(board)
   defense_priority = find_priority_squares(board, PLAYER_MARKER).sample
   offense_priority = find_priority_squares(board, CPU_MARKER).sample
+  center_square = (board.size / 2) + 1 
 
   offense_priority || defense_priority ||
-    empty_squares.find { |sq| sq == 5 } || empty_squares.sample
-    # 5 - board size / 2  +1 
+    empty_squares.find { |sq| sq == center_square } || empty_squares.sample
 end
 
 def find_priority_squares(board, marker)
   empty_squares(board).select do |square|
     filtered_wincons = WIN_CONDITIONS.select { |line| line.include?(square) }
-    filtered_wincons.any? { |line| board.values_at(*line).count(marker) == 2 }
+    filtered_wincons.any? { |line| board.values_at(*line).count(marker) == (BOARD_LENGTH - 1) }
   end
 end
 
