@@ -1,82 +1,42 @@
+require 'io/console'
 require 'pry'
 
 MAX_VALUE = 21
-
+DEALER_MIN = 17
+SUITS = ['Diamonds', 'Clubs', 'Hearts', 'Spades']
+FACES = Array('2'..'10') + ['Jack', 'Queen', 'King', 'Ace']
 CARD_VALUES = {
   'Jack' => 10, 'Queen' => 10, 'King' => 10,
   'Ace' => [1, 11]
 }
-# Twenty-one
-# 52-card deck:
-#   4 suits (hearts/diamonds/clubs/spades)
-#   13 values: 2-10, jack, queen, king, ace
 
-# VS. Format: Dealer vs Player
-# Wincon: Whoever ends closer to 21 (without going over) wins
-
-# Game Format: 
-# - Both participants are dealt 2 cards to start.
-# Player starts first. Can choose to either 'hit' or 'stay'
-# - Player has access to their hand of cards and one of the dealer's cards
-# Player turn:
-# - Hit: Draw another card from the deck
-# - Stay: Pass and end player's turn
-# - Loop until the player 'stays' OR 'busts' (over 21)
-#   - If player busts, go straight to game over (dealer wins)
-
-# After player stays, dealer's turn starts
-# - Dealer must hit until the total is at least 17.
-# - After 17, the dealer may continue to hit or stay.
-# - Loop until the dealer stays or busts.
-#   - If dealer busts, go straight to game over (player wins)
-
-# If neither participant busts, compare the value of their hands.
-#   Whoever has the higher value wins.
-
-# Card values:
-# 2-10: Face value
-# Jack/queen/king: 10
-# Ace: 1 or 11
-#   - 11 if the sum of the hand does not exceed 21
-#   - Different aces can have different values
-#     - eg. 2 + ace + 5 + ace => 2 + 11 + 5 + 1
-#     - The second ace cannot be 11 (>21) so it must be 1;
-#     - The first ace remains 11 because WHEN it is added, the sum 
-#     - of totals is < 21 (?)
-#   10 + ace + ace - both aces must be 1 because otherwise total is 22 (10+11+1)
-#   9 + ace + 3 - ace must be 1 because 9 + 11 + 3 > 21 
-#   5 + ace + ace - ace # 1 is 11 (5+11 < 21), ace #2 is 1
-#   add aces at the end - after all other values have been summed (starting sum)
-#   - determine the value of each ace based on that order
-#   - only one ace (max) can be 11
-
-# Program Flow:
-# Print hello + rules + etc
-# 1) Initialize the 'deck' as a data structure
-# 2) Deal cards to the player and the dealer from the deck
-#   - Remove those cards from the deck and add them to the 
-#   'player hand' and 'dealer hand' data structures respectively
-# - Display the player's cards to the player + one dealer card (random)
-
-# 3) Player Turn: Prompt the player to either hit or stay.
-#   - Repeat loop until the player either 'stays' or busts
-# 4) If player busts, the dealer wins (skip to declaring winner)
-# 5) Dealer turn: Hit or stay
-#   - Dealer does not get to choose whether they hit or stay:
-#   - If total is < 17, hit; if total is >= 17, stay
-#   - Loop until dealer stays or busts
-# 6) If dealer busts, player wins (skip to winner)
-# 7) Compare deck values and determine the winner
-# 8) Play again?
-
-# deck = [
-#   ['Jack', 'Hearts'],
-#   ['Ace', 'Spades'],
-#   ['10', 'Hearts'], etc.
-# ]
-
+# Game Prompts/Output
 def prompt(str)
   puts ">> #{str}"
+end
+
+def display_rules
+  prompt("Welcome to #{MAX_VALUE}! The rules are as follows:")
+  puts <<-HEREDOC
+  1) You and the computer ('dealer') will both start with 2 cards. You will be 
+     able to see both of your cards, but only one of the dealer's cards.
+  2) You may 'hit' (draw) as many times as you like during your turn; 
+      alternatively, you can 'stay' (pass) to end your turn.
+  3) The goal of the game is to get your cards' value as close to #{MAX_VALUE} as
+     possible, without going over. If you go over, you bust!
+  4) If you stay, the dealer will hit until they reach a value of at least #{DEALER_MIN}.
+     If the dealer busts, you win.
+  5) If neither of you bust, whoever has the higher value wins!
+    HEREDOC
+end
+
+def choose_number_of_wins
+  loop do
+    prompt("How many wins would you like to play up to?")
+    input = gets.chomp
+    return input.to_i if numeric?(input) && input.to_i.positive?
+    prompt("Invalid input - Please enter a positive number!")
+  end
 end
 
 def format_card(card)
@@ -84,9 +44,7 @@ def format_card(card)
 end
 
 def initialize_deck
-  suits = ['Diamonds', 'Clubs', 'Hearts', 'Spades']
-  faces = Array('2'..'10') + ['Jack', 'Queen', 'King', 'Ace']
-  suits.product(faces)
+  SUITS.product(FACES)
 end
 
 def deal_cards!(deck, hand, int=1)
@@ -131,9 +89,9 @@ def player_turn(deck, hands)
 end
 
 def dealer_turn(deck, hands)
-  until calculate_value(hands[:dealer]) >= 17 || busted?(hands[:dealer])
+  until calculate_value(hands[:dealer]) >= DEALER_MIN || busted?(hands[:dealer])
     deal_cards!(deck, hands[:dealer])
-    display_cards(hands, false)
+    display_cards(hands, hide_dealer: false)
   end
 end
 
@@ -194,32 +152,53 @@ def play_again?
   end
 end
 
+
+# Main Program 
+display_rules
+
+# Choose number of rounds (series)
+# on each round, reinitialize the deck and stuff
+# After each series, ask if they want to play again
+
 loop do
-  deck = initialize_deck
-  hands = { player: [], dealer: [] }
+  number_of_wins = choose_number_of_wins
+  scores = { player: 0, dealer: 0 }
+  loop do 
+    deck = initialize_deck
+    hands = { player: [], dealer: [] }
+    
 
-  deal_cards!(deck, hands[:player], 2)
-  deal_cards!(deck, hands[:dealer], 2)
-  display_cards(hands)
+    deal_cards!(deck, hands[:player], 2)
+    deal_cards!(deck, hands[:dealer], 2)
+    display_cards(hands)
+  
+    player_turn(deck, hands)
+  
+    if busted?(hands[:player])
+      prompt("Busted!")
+    else
+      display_cards(hands, hide_dealer: false)
+      dealer_turn(deck, hands)
+      prompt("Dealer busted") if busted?(hands[:dealer])
+    end
+    winner = determine_winner(hands)
+    prompt("#{winner} wins!")
 
-  player_turn(deck, hands)
+    increment_scores(scores, winner)
+    break if scores.values.any?(number_of_wins)
+    binding.pry
+    # Increment winner's score
+    # check if any score value is = number of wins; break if true
 
-  if busted?(hands[:player])
-    prompt("Busted!")
-  else
-    display_cards(hands, hide_dealer: false)
-    dealer_turn(deck, hands)
-    prompt("Dealer busted") if busted?(hands[:dealer])
+
+    
+    prompt("Press any key to continue:")
+    $stdin.getch
   end
-  winner = determine_winner(hands)
-  prompt("#{winner} wins!")
   break unless play_again?
 end
+
 prompt("Thanks for playing. Goodbye!")
 
-# 1) Player turn
-# - If player busted, end game and display winner
-# 2) Dealer turn - display all their cards
-# - If dealer busted, end game and display winner
-# 3) Compare Player vs Dealer scores
-# - Display winner
+
+# tie handling?
