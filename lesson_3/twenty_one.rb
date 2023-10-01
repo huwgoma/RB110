@@ -96,12 +96,20 @@ def deal_cards!(deck, hand, int=1)
   end
 end
 
-def display_cards(hands)
-  system('clear')
-  # Refactor - Display all cards with a toggle to hide all but one (also extract)
-  prompt("Dealer: #{format_card(hands[:dealer].first)} + Hidden Card")
+def display_cards(hands, hide_dealer: true)
+  system('clear')  
+  display_dealer_hand(hands[:dealer], hide_dealer)
+  
   # Refactor later
   prompt("Player: #{hands[:player].map { |card| format_card(card) }}") 
+end
+
+def display_dealer_hand(hand, hidden=true)
+  if hidden
+    prompt("Dealer: #{format_card(hand.first)} + Hidden Card")
+  else
+    prompt("Dealer: #{hand.map { |card| format_card(card) }}") 
+  end
 end
 
 def prompt_choice
@@ -125,7 +133,7 @@ end
 def dealer_turn(deck, hands)
   until calculate_value(hands[:dealer]) >= 17 || busted?(hands[:dealer])
     deal_cards!(deck, hands[:dealer])
-    display_cards(hands)
+    display_cards(hands, false)
   end
 end
 
@@ -167,23 +175,47 @@ def numeric?(string)
   string.to_i.to_s == string
 end
 
-deck = initialize_deck
-hands = { player: [], dealer: [] }
-
-deal_cards!(deck, hands[:player], 2)
-deal_cards!(deck, hands[:dealer], 2)
-display_cards(hands)
-
-player_turn(deck, hands)
-
-# if player was busted, skip dealer turn and go to outcome screen
-
-if busted?(hands[:player])
-  prompt("Busted!") 
-else
-  dealer_turn(deck, hands)
-  prompt("Dealer busted") if busted?(hands[:dealer])
+def determine_winner(hands)
+  if busted?(hands[:player])
+    'Dealer'
+  elsif busted?(hands[:dealer])
+    'Player'
+  else
+    hands.max_by { |_party, hand| calculate_value(hand) }.first.to_s.capitalize
+  end
 end
+
+def play_again?
+  loop do
+    prompt("Would you like to play again? (Y/N)")
+    input = gets.chomp.downcase
+    return input == 'y' if ['y', 'n'].include?(input)
+    prompt("Invalid input - please enter Y or N!")
+  end
+end
+
+loop do
+  deck = initialize_deck
+  hands = { player: [], dealer: [] }
+
+  deal_cards!(deck, hands[:player], 2)
+  deal_cards!(deck, hands[:dealer], 2)
+  display_cards(hands)
+
+  player_turn(deck, hands)
+
+  if busted?(hands[:player])
+    prompt("Busted!")
+  else
+    display_cards(hands, hide_dealer: false)
+    dealer_turn(deck, hands)
+    prompt("Dealer busted") if busted?(hands[:dealer])
+  end
+  winner = determine_winner(hands)
+  prompt("#{winner} wins!")
+  break unless play_again?
+end
+prompt("Thanks for playing. Goodbye!")
 
 # 1) Player turn
 # - If player busted, end game and display winner
