@@ -98,6 +98,7 @@ end
 
 def display_cards(hands)
   system('clear')
+  # Refactor - Display all cards with a toggle to hide all but one (also extract)
   prompt("Dealer: #{format_card(hands[:dealer].first)} + Hidden Card")
   # Refactor later
   prompt("Player: #{hands[:player].map { |card| format_card(card) }}") 
@@ -118,6 +119,13 @@ def player_turn(deck, hands)
     deal_cards!(deck, hands[:player]) if choice == 'h'
     display_cards(hands)
     break if choice == 's' || busted?(hands[:player])
+  end
+end
+
+def dealer_turn(deck, hands)
+  until calculate_value(hands[:dealer]) >= 17 || busted?(hands[:dealer])
+    deal_cards!(deck, hands[:dealer])
+    display_cards(hands)
   end
 end
 
@@ -168,8 +176,18 @@ display_cards(hands)
 
 player_turn(deck, hands)
 
+# if player was busted, skip dealer turn and go to outcome screen
+
 if busted?(hands[:player])
   prompt("Busted!") 
 else
-  # dealer_turn
+  dealer_turn(deck, hands)
+  prompt("Dealer busted") if busted?(hands[:dealer])
 end
+
+# 1) Player turn
+# - If player busted, end game and display winner
+# 2) Dealer turn - display all their cards
+# - If dealer busted, end game and display winner
+# 3) Compare Player vs Dealer scores
+# - Display winner
