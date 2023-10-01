@@ -138,9 +138,23 @@ def determine_winner(hands)
     'Dealer'
   elsif busted?(hands[:dealer])
     'Player'
-  else
-    # tie?
+  else 
+    return nil if tie?(hands)
     hands.max_by { |_party, hand| calculate_value(hand) }.first.to_s.capitalize
+  end
+end
+
+def tie?(hands)
+  player_total = calculate_value(hands[:player])
+  dealer_total = calculate_value(hands[:dealer])
+  player_total == dealer_total
+end
+
+def display_game_result(winner)
+  if winner.nil?
+    prompt("It's a tie!")
+  else
+    prompt("#{winner} wins!")
   end
 end
 
@@ -171,9 +185,8 @@ loop do
   scores = { player: 0, dealer: 0 }
   loop do 
     deck = initialize_deck
-    hands = { player: [], dealer: [] }
+    hands = { player: [['Hearts', '10']], dealer: [['Hearts', '10']] }
     
-
     deal_cards!(deck, hands[:player], 2)
     deal_cards!(deck, hands[:dealer], 2)
     display_cards(hands)
@@ -188,23 +201,17 @@ loop do
       prompt("Dealer busted") if busted?(hands[:dealer])
     end
     winner = determine_winner(hands)
-    prompt("#{winner} wins!")
+    display_game_result(winner)
 
     increment_scores(scores, winner)
     break if scores.values.any?(number_of_wins)
-    binding.pry
-    # Increment winner's score
-    # check if any score value is = number of wins; break if true
-
-
     
     prompt("Press any key to continue:")
     $stdin.getch
   end
+  # display winner of series
+  # ___ wins with a score of __ - ___!
   break unless play_again?
 end
 
 prompt("Thanks for playing. Goodbye!")
-
-
-# tie handling?
