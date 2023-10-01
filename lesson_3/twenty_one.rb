@@ -55,7 +55,7 @@ def deal_cards!(deck, hand, int=1)
 end
 
 def display_cards(hands, hide_dealer: true)
-  system('clear')  
+  #system('clear')  
   display_dealer_hand(hands[:dealer], hide_dealer)
   
   # Refactor later
@@ -163,6 +163,21 @@ def increment_scores(scores, winner)
   scores[winner.downcase.to_sym] += 1
 end
 
+def display_scores(scores)
+  scores.each do |party, score|
+    prompt("#{party.to_s.capitalize}: #{score}")
+  end
+end
+
+def determine_series_winner(scores)
+  winner = scores.max_by { |_party, score| score }
+  winner.first.to_s.capitalize
+end
+
+def display_series_result(winner, scores)
+  prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
+end
+
 def play_again?
   loop do
     prompt("Would you like to play again? (Y/N)")
@@ -185,10 +200,11 @@ loop do
   scores = { player: 0, dealer: 0 }
   loop do 
     deck = initialize_deck
-    hands = { player: [['Hearts', '10']], dealer: [['Hearts', '10']] }
+    hands = { player: [], dealer: [] }
     
     deal_cards!(deck, hands[:player], 2)
     deal_cards!(deck, hands[:dealer], 2)
+    display_scores(scores)
     display_cards(hands)
   
     player_turn(deck, hands)
@@ -204,13 +220,16 @@ loop do
     display_game_result(winner)
 
     increment_scores(scores, winner)
+    display_scores(scores)
     break if scores.values.any?(number_of_wins)
     
     prompt("Press any key to continue:")
     $stdin.getch
   end
-  # display winner of series
-  # ___ wins with a score of __ - ___!
+  
+  series_winner = determine_series_winner(scores)
+  display_series_result(series_winner, scores)
+
   break unless play_again?
 end
 
