@@ -139,8 +139,14 @@ def determine_winner(hands)
   elsif busted?(hands[:dealer])
     'Player'
   else
+    # tie?
     hands.max_by { |_party, hand| calculate_value(hand) }.first.to_s.capitalize
   end
+end
+
+def increment_scores(scores, winner)
+  return if winner.nil?
+  scores[winner.downcase.to_sym] += 1
 end
 
 def play_again?
