@@ -79,8 +79,8 @@ def prompt_player_choice
   end
 end
 
-def display_postgame(hands, winner)
-  display_bust_result(hands)
+def display_postgame(winner, player_total, dealer_total)
+  display_bust(player_total, dealer_total)
   display_game_result(winner)
 end
 
@@ -93,9 +93,9 @@ def display_game_result(winner)
   end
 end
 
-def display_bust_result(hands)
-  prompt("You went over 21 - busted!") if busted?(hands[:player])
-  prompt("The dealer went over 21 - busted!") if busted?(hands[:dealer])
+def display_bust(player_total, dealer_total)
+  prompt("You went over 21 - busted!") if busted?(player_total)
+  prompt("The dealer went over 21 - busted!") if busted?(dealer_total)
 end
 
 def display_series_result(winner, scores)
@@ -125,12 +125,15 @@ def player_turn(deck, hands, scores)
     choice = prompt_player_choice
     deal_cards!(deck, hands[:player]) if choice == 'h'
     display_game(hands, scores)
-    break if choice == 's' || busted?(hands[:player])
+    current_total = total_value(hands[:player])
+    break if choice == 's' || busted?(current_total)
   end
 end
 
 def dealer_turn(deck, hands, scores)
-  until total_value(hands[:dealer]) >= DEALER_MIN || busted?(hands[:dealer])
+  loop do
+    current_total = total_value(hands[:dealer])
+    break if current_total >= DEALER_MIN || busted?(current_total)
     prompt("Dealer is now drawing...")
     sleep 1
     deal_cards!(deck, hands[:dealer])
@@ -146,9 +149,8 @@ def numeric?(string)
   string.to_i.to_s == string
 end
 
-def busted?(hand)
-  value = total_value(hand)
-  value > MAX_VALUE
+def busted?(total)
+  total > MAX_VALUE
 end
 
 def total_value(hand)
@@ -176,20 +178,18 @@ def calculate_ace_values(sum, aces)
   end
 end
 
-def determine_winner(hands)
-  if busted?(hands[:player])
+def determine_winner(hands, player_total, dealer_total)
+  # logic not right
+  if busted?(player_total) || dealer_total > player_total
     'Dealer'
-  elsif busted?(hands[:dealer])
+  elsif busted?(dealer_total) || player_total > dealer_total
     'Player'
-  else 
-    return nil if tie?(hands)
-    hands.max_by { |_party, hand| total_value(hand) }.first.to_s.capitalize
+  elsif tie?(player_total, dealer_total)
+    nil
   end
 end
 
-def tie?(hands)
-  player_total = total_value(hands[:player])
-  dealer_total = total_value(hands[:dealer])
+def tie?(player_total, dealer_total)
   player_total == dealer_total
 end
 
@@ -226,12 +226,15 @@ loop do
     display_game(hands, scores)
 
     player_turn(deck, hands, scores)
-    dealer_turn(deck, hands, scores) unless busted?(hands[:player])
+    player_total = total_value(hands[:player])
 
-    winner = determine_winner(hands)
+    dealer_turn(deck, hands, scores) unless busted?(player_total)
+    dealer_total = total_value(hands[:dealer])
+
+    winner = determine_winner(hands, player_total, dealer_total)
     increment_scores(scores, winner)
     display_game(hands, scores, hide_dealer: false)
-    display_postgame(hands, winner)
+    display_postgame(winner, player_total, dealer_total)
 
     break if scores.values.any?(number_of_wins)
     
@@ -246,3 +249,12 @@ loop do
 end
 
 prompt("Thanks for playing. Goodbye!")
+
+# Refactor total:
+# Instead of calculating total every time, calculate it in the main loop and cache its value
+# when does total need to be calculated? when does it need to be updated?
+# PLAYER TOTAL:
+# - should be calculated after player turn
+# DEALER TOTAL: 
+# - should be calculated after dealer turn
+# needs to be updated after every loop during dealer turn?
