@@ -24,7 +24,7 @@ def display_rules
   2) You may 'hit' (draw) as many times as you like during your turn; 
       alternatively, you can 'stay' (pass) to end your turn.
   3) The goal of the game is to get your cards' value as close to #{MAX_VALUE} as
-     possible, without going over. If you go over, you bust!
+     possible, without going over. If you go over, you bust! # explain face values
   4) If you stay, the dealer will hit until they reach a value of at least #{DEALER_MIN}.
      If the dealer busts, you win.
   5) If neither of you bust, whoever has the higher value wins!
@@ -47,17 +47,19 @@ end
 def display_game(hands, scores, hide_dealer: true)
   system('clear')
   display_scores(scores)
-  display_cards(hands, hide_dealer)
+  display_cards(hands, hide_dealer: hide_dealer)
 end
 
 def display_scores(scores)
   prompt("Player: #{scores[:player]}; Dealer: #{scores[:dealer]}")
 end
 
-def display_cards(hands, hide_dealer=true)
+def display_cards(hands, hide_dealer: true)
+  puts '=' * 50
   display_dealer_hand(hands[:dealer], hide_dealer)
   # Refactor at some point
   prompt("Player: #{hands[:player].map { |card| format_card_string(card) }}") 
+  puts '=' * 50
 end
 
 def display_dealer_hand(hand, hidden=true)
@@ -81,17 +83,29 @@ def display_game_result(winner)
   if winner.nil?
     prompt("It's a tie!")
   else
+    # display hand value as well
     prompt("#{winner} wins!")
   end
 end
 
+def display_bust_message(hands)
+  prompt("You went over 21 - busted!") if busted?(hands[:player])
+  prompt("The dealer went over 21 - busted!") if busted?(hands[:dealer])
+end
+
 def display_series_result(winner, scores)
+  # handle tie case
   prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
 end
 
 # Game Calculation/Logic
 def initialize_deck
   SUITS.product(FACES)
+end
+
+def initialize_hands(deck)
+  hands = { player: [], dealer: [] }
+  hands.each { |_party, hand| deal_cards!(deck, hand, 2) } 
 end
 
 def deal_cards!(deck, hand, int=1)
@@ -112,7 +126,7 @@ end
 
 def dealer_turn(deck, hands, scores)
   until total_value(hands[:dealer]) >= DEALER_MIN || busted?(hands[:dealer])
-    prompt("Dealer drawing...")
+    prompt("Dealer is now drawing...")
     sleep 1
     deal_cards!(deck, hands[:dealer])
     display_game(hands, scores, hide_dealer: false)
@@ -180,6 +194,7 @@ def increment_scores(scores, winner)
 end
 
 def determine_series_winner(scores)
+  # handle tie case (even number of wins)
   winner = scores.max_by { |_party, score| score }
   winner.first.to_s.capitalize
 end
@@ -193,38 +208,29 @@ def play_again?
   end
 end
 
-
 # Main Program 
 display_rules
 
 # Refactor main loop (clean up)
+# Series Loop
 loop do
   number_of_wins = choose_number_of_wins
   scores = { player: 0, dealer: 0 }
+  # Game Loop
   loop do 
     deck = initialize_deck
-    hands = { player: [], dealer: [] }
-    
-    deal_cards!(deck, hands[:player], 2)
-    deal_cards!(deck, hands[:dealer], 2)
-
+    hands = initialize_hands(deck)
     display_game(hands, scores)
-  
+
     player_turn(deck, hands, scores)
-  
-    if busted?(hands[:player])
-      prompt("Busted!")
-    else
-      display_game(hands, scores, hide_dealer: false)
-      dealer_turn(deck, hands, scores)
-      prompt("Dealer busted") if busted?(hands[:dealer])
-    end
+    dealer_turn(deck, hands, scores) unless busted?(hands[:player])
+
     winner = determine_winner(hands)
-    #binding.pry
+    increment_scores(scores, winner)
+    display_game(hands, scores, hide_dealer: false)
+    display_bust_message(hands)
     display_game_result(winner)
 
-    increment_scores(scores, winner)
-    display_scores(scores)
     break if scores.values.any?(number_of_wins)
     
     prompt("Press any key to continue:")
