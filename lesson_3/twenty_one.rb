@@ -16,6 +16,7 @@ def prompt(str)
 end
 
 def display_rules
+  system('clear')
   prompt("Welcome to #{MAX_VALUE}! The rules are as follows:")
   puts <<-HEREDOC
   1) You and the computer ('dealer') will both start with 2 cards. You will be 
@@ -39,10 +40,56 @@ def choose_number_of_wins
   end
 end
 
-def format_card(card)
+def format_card_string(card)
   "#{card.last} of #{card.first}"
 end
 
+def display_game(hands, scores, hide_dealer: true)
+  system('clear')
+  display_scores(scores)
+  display_cards(hands, hide_dealer)
+end
+
+def display_scores(scores)
+  prompt("Player: #{scores[:player]}; Dealer: #{scores[:dealer]}")
+end
+
+def display_cards(hands, hide_dealer=true)
+  display_dealer_hand(hands[:dealer], hide_dealer)
+  # Refactor at some point
+  prompt("Player: #{hands[:player].map { |card| format_card_string(card) }}") 
+end
+
+def display_dealer_hand(hand, hidden=true)
+  if hidden
+    prompt("Dealer: #{format_card_string(hand.first)} + Hidden Card")
+  else
+    prompt("Dealer: #{hand.map { |card| format_card_string(card) }}") 
+  end
+end
+
+def prompt_player_choice
+  loop do
+    prompt("Would you like to hit (H) or stay (S)?")
+    choice = gets.chomp.downcase
+    return choice[0] if ['hit', 'stay', 'h', 's'].include?(choice)
+    prompt("Invalid input! Please enter H (hit) or S (stay).")
+  end
+end
+
+def display_game_result(winner)
+  if winner.nil?
+    prompt("It's a tie!")
+  else
+    prompt("#{winner} wins!")
+  end
+end
+
+def display_series_result(winner, scores)
+  prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
+end
+
+# Game Calculation/Logic
 def initialize_deck
   SUITS.product(FACES)
 end
@@ -54,53 +101,38 @@ def deal_cards!(deck, hand, int=1)
   end
 end
 
-def display_cards(hands, hide_dealer: true)
-  #system('clear')  
-  display_dealer_hand(hands[:dealer], hide_dealer)
-  
-  # Refactor later
-  prompt("Player: #{hands[:player].map { |card| format_card(card) }}") 
-end
-
-def display_dealer_hand(hand, hidden=true)
-  if hidden
-    prompt("Dealer: #{format_card(hand.first)} + Hidden Card")
-  else
-    prompt("Dealer: #{hand.map { |card| format_card(card) }}") 
-  end
-end
-
-def prompt_choice
+def player_turn(deck, hands, scores)
   loop do
-    prompt("Would you like to hit (H) or stay (S)?")
-    choice = gets.chomp.downcase
-    return choice[0] if ['hit', 'stay', 'h', 's'].include?(choice)
-    prompt("Invalid input! Please enter H (hit) or S (stay).")
-  end
-end
-
-def player_turn(deck, hands)
-  loop do
-    choice = prompt_choice
+    choice = prompt_player_choice
     deal_cards!(deck, hands[:player]) if choice == 'h'
-    display_cards(hands)
+    display_game(hands, scores)
     break if choice == 's' || busted?(hands[:player])
   end
 end
 
-def dealer_turn(deck, hands)
-  until calculate_value(hands[:dealer]) >= DEALER_MIN || busted?(hands[:dealer])
+def dealer_turn(deck, hands, scores)
+  until total_value(hands[:dealer]) >= DEALER_MIN || busted?(hands[:dealer])
+    prompt("Dealer drawing...")
+    sleep 1
     deal_cards!(deck, hands[:dealer])
-    display_cards(hands, hide_dealer: false)
+    display_game(hands, scores, hide_dealer: false)
   end
 end
 
+def convert_face_value(value)
+  numeric?(value) ? value.to_i : CARD_VALUES[value]
+end
+
+def numeric?(string)
+  string.to_i.to_s == string
+end
+
 def busted?(hand)
-  value = calculate_value(hand)
+  value = total_value(hand)
   value > MAX_VALUE
 end
 
-def calculate_value(hand)
+def total_value(hand)
   aces, non_aces = hand.partition { |card| card.last == 'Ace' }
   non_ace_sum = non_aces.map { |card| convert_face_value(card.last) }.sum
 
@@ -125,14 +157,6 @@ def calculate_ace_values(sum, aces)
   end
 end
 
-def convert_face_value(value)
-  numeric?(value) ? value.to_i : CARD_VALUES[value]
-end
-
-def numeric?(string)
-  string.to_i.to_s == string
-end
-
 def determine_winner(hands)
   if busted?(hands[:player])
     'Dealer'
@@ -140,22 +164,14 @@ def determine_winner(hands)
     'Player'
   else 
     return nil if tie?(hands)
-    hands.max_by { |_party, hand| calculate_value(hand) }.first.to_s.capitalize
+    hands.max_by { |_party, hand| total_value(hand) }.first.to_s.capitalize
   end
 end
 
 def tie?(hands)
-  player_total = calculate_value(hands[:player])
-  dealer_total = calculate_value(hands[:dealer])
+  player_total = total_value(hands[:player])
+  dealer_total = total_value(hands[:dealer])
   player_total == dealer_total
-end
-
-def display_game_result(winner)
-  if winner.nil?
-    prompt("It's a tie!")
-  else
-    prompt("#{winner} wins!")
-  end
 end
 
 def increment_scores(scores, winner)
@@ -163,19 +179,9 @@ def increment_scores(scores, winner)
   scores[winner.downcase.to_sym] += 1
 end
 
-def display_scores(scores)
-  scores.each do |party, score|
-    prompt("#{party.to_s.capitalize}: #{score}")
-  end
-end
-
 def determine_series_winner(scores)
   winner = scores.max_by { |_party, score| score }
   winner.first.to_s.capitalize
-end
-
-def display_series_result(winner, scores)
-  prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
 end
 
 def play_again?
@@ -191,10 +197,7 @@ end
 # Main Program 
 display_rules
 
-# Choose number of rounds (series)
-# on each round, reinitialize the deck and stuff
-# After each series, ask if they want to play again
-
+# Refactor main loop (clean up)
 loop do
   number_of_wins = choose_number_of_wins
   scores = { player: 0, dealer: 0 }
@@ -204,19 +207,20 @@ loop do
     
     deal_cards!(deck, hands[:player], 2)
     deal_cards!(deck, hands[:dealer], 2)
-    display_scores(scores)
-    display_cards(hands)
+
+    display_game(hands, scores)
   
-    player_turn(deck, hands)
+    player_turn(deck, hands, scores)
   
     if busted?(hands[:player])
       prompt("Busted!")
     else
-      display_cards(hands, hide_dealer: false)
-      dealer_turn(deck, hands)
+      display_game(hands, scores, hide_dealer: false)
+      dealer_turn(deck, hands, scores)
       prompt("Dealer busted") if busted?(hands[:dealer])
     end
     winner = determine_winner(hands)
+    #binding.pry
     display_game_result(winner)
 
     increment_scores(scores, winner)
