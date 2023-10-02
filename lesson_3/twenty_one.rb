@@ -24,7 +24,10 @@ def display_rules
   2) You may 'hit' (draw) as many times as you like during your turn; 
       alternatively, you can 'stay' (pass) to end your turn.
   3) The goal of the game is to get your cards' value as close to #{MAX_VALUE} as
-     possible, without going over. If you go over, you bust! # explain face values
+     possible, without going over. If you go over, you bust!
+  3a) Cards 2-10 are worth their face values in points. Jacks, Queens, and Kings
+     are worth 10. Aces are worth either 1 or 11, depending on whether your 
+     hand total will exceed 21.
   4) If you stay, the dealer will hit until they reach a value of at least #{DEALER_MIN}.
      If the dealer busts, you win.
   5) If neither of you bust, whoever has the higher value wins!
