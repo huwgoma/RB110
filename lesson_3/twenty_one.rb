@@ -51,8 +51,7 @@ def display_game(hands, scores, hide_dealer: true)
 end
 
 def display_scores(scores)
-  # running score:
-  prompt("Player: #{scores[:player]}; Dealer: #{scores[:dealer]}")
+  prompt("Running Scores - Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
 end
 
 def display_cards(hands, hide_dealer: true)
@@ -100,7 +99,6 @@ def display_bust(player_total, dealer_total)
 end
 
 def display_series_result(winner, scores)
-  # handle tie case
   prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
 end
 
@@ -200,7 +198,6 @@ def increment_scores(scores, winner)
 end
 
 def determine_series_winner(scores)
-  # handle tie case (even number of wins)
   winner = scores.max_by { |_party, score| score }
   winner.first.to_s.capitalize
 end
