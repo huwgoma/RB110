@@ -79,6 +79,11 @@ def prompt_player_choice
   end
 end
 
+def display_postgame(hands, winner)
+  display_bust_result(hands)
+  display_game_result(winner)
+end
+
 def display_game_result(winner)
   if winner.nil?
     prompt("It's a tie!")
@@ -88,7 +93,7 @@ def display_game_result(winner)
   end
 end
 
-def display_bust_message(hands)
+def display_bust_result(hands)
   prompt("You went over 21 - busted!") if busted?(hands[:player])
   prompt("The dealer went over 21 - busted!") if busted?(hands[:dealer])
 end
@@ -210,8 +215,6 @@ end
 
 # Main Program 
 display_rules
-
-# Refactor main loop (clean up)
 # Series Loop
 loop do
   number_of_wins = choose_number_of_wins
@@ -228,8 +231,7 @@ loop do
     winner = determine_winner(hands)
     increment_scores(scores, winner)
     display_game(hands, scores, hide_dealer: false)
-    display_bust_message(hands)
-    display_game_result(winner)
+    display_postgame(hands, winner)
 
     break if scores.values.any?(number_of_wins)
     
