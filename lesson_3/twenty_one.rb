@@ -51,6 +51,7 @@ def display_game(hands, scores, hide_dealer: true)
 end
 
 def display_scores(scores)
+  # running score:
   prompt("Player: #{scores[:player]}; Dealer: #{scores[:dealer]}")
 end
 
@@ -179,13 +180,13 @@ def calculate_ace_values(sum, aces)
 end
 
 def determine_winner(hands, player_total, dealer_total)
-  # logic not right
-  if busted?(player_total) || dealer_total > player_total
+  if busted?(player_total)
     'Dealer'
-  elsif busted?(dealer_total) || player_total > dealer_total
+  elsif busted?(dealer_total)
     'Player'
-  elsif tie?(player_total, dealer_total)
-    nil
+  else
+    return nil if tie?(player_total, dealer_total)
+    player_total > dealer_total ? 'Player' : 'Dealer'
   end
 end
 
@@ -249,12 +250,3 @@ loop do
 end
 
 prompt("Thanks for playing. Goodbye!")
-
-# Refactor total:
-# Instead of calculating total every time, calculate it in the main loop and cache its value
-# when does total need to be calculated? when does it need to be updated?
-# PLAYER TOTAL:
-# - should be calculated after player turn
-# DEALER TOTAL: 
-# - should be calculated after dealer turn
-# needs to be updated after every loop during dealer turn?
