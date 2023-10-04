@@ -82,44 +82,37 @@ def prompt_player_choice
   end
 end
 
-# 
 def display_postgame(winner, player_total, dealer_total)
-  binding.pry
-  # given the total values of 
-  display_bust(player_total, dealer_total) # if busted?(player) || busted?(dealer)
-
-  # display_totals - player hand: 21; dealer hand: ?? # unless busted (else)
-  # display_winner - player wins!
-
-  # split this into display_totals and display_winner 
-  display_game_result(winner, player_total, dealer_total)
+  busted_player = find_busted_player(player_total, dealer_total) #we just know SOMEONE busted - but not who yet 
+  if busted_player
+    display_busted(busted_player) 
+  else
+    display_totals(player_total, dealer_total)
+  end
+  display_winner(winner)
 end
 
-def display_bust_message(player_total, dealer_total)
-  # who busted?
-  # <busted person> went over 21 - busted!
-  prompt("You went over 21 - busted!") if busted?(player_total)
-  prompt("The dealer went over 21 - busted!") if busted?(dealer_total)
+def display_busted(busted_player)
+  busted_player = 'You' if busted_player == 'Player'
+  prompt("#{busted_player} went over 21 - busted!")
 end
 
-def display_game_result(winner, player_total, dealer_total) #  winner_total, loser_total
+def display_totals(player_total, dealer_total)
+  prompt("Your hand is worth #{player_total}; the dealer's hand is worth #{dealer_total}.")
+end
+
+def display_winner(winner)
   if winner.nil?
     prompt("It's a tie!")
   else
-    loser_total, winner_total = [player_total, dealer_total].minmax
-
-    binding.pry
-
-    # display hand value as well
-    prompt("#{winner} wins with a hand of #{winner_total} vs. #{loser_total}!")
+    prompt("#{winner} wins!")
   end
 end
-
-
 
 def display_series_result(winner, scores)
   prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
 end
+
 
 # Game Calculation/Logic
 def initialize_deck
@@ -171,6 +164,16 @@ def busted?(total)
   total > MAX_VALUE
 end
 
+def find_busted_player(player_total, dealer_total)
+  if busted?(player_total)
+    'Player'
+  elsif busted?(dealer_total)
+    'Dealer'
+  else
+    nil
+  end
+end
+
 def total_value(hand)
   aces, non_aces = hand.partition { |card| card.last == 'Ace' }
   non_ace_sum = non_aces.map { |card| convert_face_value(card.last) }.sum
@@ -196,7 +199,7 @@ def calculate_ace_values(sum, aces)
   end
 end
 
-def determine_winner(hands, player_total, dealer_total)
+def find_winner(player_total, dealer_total)
   if busted?(player_total)
     'Dealer'
   elsif busted?(dealer_total)
@@ -248,12 +251,9 @@ loop do
     dealer_turn(deck, hands, scores) unless busted?(player_total)
     dealer_total = total_value(hands[:dealer])
 
-    winner = determine_winner(hands, player_total, dealer_total)
+    winner = find_winner(player_total, dealer_total)
     increment_scores(scores, winner)
     display_game(hands, scores, hide_dealer: false)
-    # display winner
-
-
     display_postgame(winner, player_total, dealer_total)
 
     break if scores.values.any?(number_of_wins)
@@ -269,9 +269,3 @@ loop do
 end
 
 prompt("Thanks for playing. Goodbye!")
-
-# maybe another data strcture?
-# participants = {
-#   player: { hand: [], total: int }
-#   dealer:   
-# }
