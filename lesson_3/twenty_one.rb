@@ -47,63 +47,33 @@ def format_card_string(card)
   "#{card.last} of #{card.first}"
 end
 
+# refactor hide dealer sometime
 def display_game(hands, scores, hide_dealer: true)
   system('clear')
   display_scores(scores)
-  display_cards(hands, hide_dealer: hide_dealer)
+  display_cards(hands, hidden: hide_dealer)
 end
 
 def display_scores(scores)
   prompt("Running Score - Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
 end
 
-def display_cards(hands, hide_dealer: true)
-  display_player_cards(hands[:player])
-  
+def display_cards(hands, hidden: true)
+  prompt("Dealer's Cards:")
+  display_hand(hands[:dealer], hidden: hidden)
   puts '=' * 50
-  display_dealer_hand(hands[:dealer], hide_dealer)
-  # Refactor at some point
-  prompt("Player: #{hands[:player].map { |card| format_card_string(card) }}") 
+  prompt("Your Cards:")
+  display_hand(hands[:player])
   puts '=' * 50
 end
-# Algorithm:
-# Given an array of arrays representing a hand of cards (eg. [ [Hearts, 10], [Spades, Ace] ]):
-# Map through each subarray. For each subarray:
-#   Create a hash, storing three things:
-#   - The first letter of the suit (eg. 'Heart' -> 'H')
-#   - The face value; if the value is non-numeric, take the first letter
-#     eg. '10' -> '10'; 'Ace' -> 'A'
-#   - The width of the card (dependent on the length of the value) - either 7 or 8.
 
-# example hash from [Spades, Ace] 
-# { suit: 'S', value: 'A', width: 7 }
-
-# have to print line by line?
-# inner width = width - 2
-# line 1: top edge - print +, "-" * inner width, +
-# line 2: top suit - print |, suit right padded with "-" to inner width, |
-
-
-# iterate 5 separate times?
-# or
-# iterate once
-# generate the 5(4) strings 
-
-# { edge: '', top_suit: '', value: '', bottom_suit: ''}
-
-# print separately after iteration
-# so example hash from [Spades, Ace] 
-# { suit: 'S', value: 'A', width: 5 }, { suit: 'H', value: '10', width: 6}
-
-# iteration 1: { suit: 'S', value: 'A', width: 5 }; width: 5
-# edge     += '+' + '-'*width + '+' (INCREMENT, not reassign (also add spaces between))
-# top_suit += '|' + '<suit>'.left pad(inner width, " ") + '|' 
-def display_player_cards(hand)
-  card_attributes = hand.map { |card| extract_card_attributes(card) }
+def display_hand(hand, hidden:false)
+  card_info = hand.map { |card| extract_card_info(card) }
+  hide_all_but_first(card_info) if hidden
   
   card_strings = { edge: '', top: '', value: '', bot: '' }
   separator = ' ' * 3
-  card_attributes.each do |card|
+  card_info.each do |card|
     card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
     card_strings[:top]   += "|#{card[:suit].ljust(card[:width])}|" + separator
     card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator 
@@ -113,11 +83,21 @@ def display_player_cards(hand)
   card_strings.each_value { |str| puts str }
 end
 
-def extract_card_attributes(card)
+def extract_card_info(card)
   suit = card.first[0]
   value = numeric?(card[1]) ? card[1] : card[1][0]
   width = value.length + 4
+
   { suit: suit, value: value, width: width }
+end
+
+def hide_all_but_first(cards)
+  cards.each do |card|
+    next if card == cards.first
+    card[:suit] = '?'
+    card[:value] = '?'
+    card[:width] = 5
+  end
 end
 # display card visually:
 # given an array representing a card eg. ['Hearts', '10'] or ['Spades', 'Ace']
