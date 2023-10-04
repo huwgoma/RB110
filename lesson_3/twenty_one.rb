@@ -54,7 +54,7 @@ def display_game(hands, scores, hide_dealer: true)
 end
 
 def display_scores(scores)
-  prompt("Running Scores - Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
+  prompt("Running Score - Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
 end
 
 def display_cards(hands, hide_dealer: true)
@@ -82,24 +82,40 @@ def prompt_player_choice
   end
 end
 
+# 
 def display_postgame(winner, player_total, dealer_total)
-  display_bust(player_total, dealer_total)
-  display_game_result(winner)
+  binding.pry
+  # given the total values of 
+  display_bust(player_total, dealer_total) # if busted?(player) || busted?(dealer)
+
+  # display_totals - player hand: 21; dealer hand: ?? # unless busted (else)
+  # display_winner - player wins!
+
+  # split this into display_totals and display_winner 
+  display_game_result(winner, player_total, dealer_total)
 end
 
-def display_game_result(winner)
-  if winner.nil?
-    prompt("It's a tie!")
-  else
-    # display hand value as well
-    prompt("#{winner} wins!")
-  end
-end
-
-def display_bust(player_total, dealer_total)
+def display_bust_message(player_total, dealer_total)
+  # who busted?
+  # <busted person> went over 21 - busted!
   prompt("You went over 21 - busted!") if busted?(player_total)
   prompt("The dealer went over 21 - busted!") if busted?(dealer_total)
 end
+
+def display_game_result(winner, player_total, dealer_total) #  winner_total, loser_total
+  if winner.nil?
+    prompt("It's a tie!")
+  else
+    loser_total, winner_total = [player_total, dealer_total].minmax
+
+    binding.pry
+
+    # display hand value as well
+    prompt("#{winner} wins with a hand of #{winner_total} vs. #{loser_total}!")
+  end
+end
+
+
 
 def display_series_result(winner, scores)
   prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
@@ -235,6 +251,9 @@ loop do
     winner = determine_winner(hands, player_total, dealer_total)
     increment_scores(scores, winner)
     display_game(hands, scores, hide_dealer: false)
+    # display winner
+
+
     display_postgame(winner, player_total, dealer_total)
 
     break if scores.values.any?(number_of_wins)
@@ -250,3 +269,9 @@ loop do
 end
 
 prompt("Thanks for playing. Goodbye!")
+
+# maybe another data strcture?
+# participants = {
+#   player: { hand: [], total: int }
+#   dealer:   
+# }
