@@ -3,7 +3,7 @@ require 'pry'
 
 MAX_VALUE = 21
 DEALER_MIN = 17
-SUITS = ['Diamonds', 'Clubs', 'Hearts', 'Spades']
+SUITS = ['♦', '♣', '♥', '♠']
 FACES = Array('2'..'10') + ['Jack', 'Queen', 'King', 'Ace']
 CARD_VALUES = {
   'Jack' => 10, 'Queen' => 10, 'King' => 10,
@@ -84,7 +84,7 @@ def display_hand(hand, hidden:false)
 end
 
 def extract_card_info(card)
-  suit = card.first[0]
+  suit = card.first
   value = numeric?(card[1]) ? card[1] : card[1][0]
   width = value.length + 4
 
