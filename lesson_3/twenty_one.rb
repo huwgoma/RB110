@@ -19,14 +19,14 @@ def display_rules
   system('clear')
   prompt("Welcome to #{MAX_VALUE}! The rules are as follows:")
   puts <<-HEREDOC
-  1) You and the computer ('dealer') will both start with 2 cards. You will be 
+  1) You and the computer ('dealer') will both start with 2 cards. You will be
      able to see both of your cards, but only one of the dealer's cards.
-  2) You may 'hit' (draw) as many times as you like during your turn; 
+  2) You may 'hit' (draw) as many times as you like during your turn;
       alternatively, you can 'stay' (pass) to end your turn.
   3) The goal of the game is to get your cards' value as close to #{MAX_VALUE} as
      possible, without going over. If you go over, you bust!
   3a) Cards 2-10 are worth their face values in points. Jacks, Queens, and Kings
-     are worth 10. Aces are worth either 1 or 11, depending on whether your 
+     are worth 10. Aces are worth either 1 or 11, depending on whether your
      hand total will exceed 21.
   4) If you stay, the dealer will hit until they reach a value of at least #{DEALER_MIN}.
      If the dealer busts, you win.
@@ -50,7 +50,7 @@ def display_game(hands, scores, hide_dealer: true)
 end
 
 def display_scores(scores)
-  prompt("Running Score - Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
+  prompt("Player: #{scores[:player]}, Dealer: #{scores[:dealer]}")
 end
 
 def display_cards(hands, hidden: true)
@@ -66,15 +66,7 @@ def display_hand(hand, hidden:false)
   card_info = hand.map { |card| extract_card_info(card) }
   hide_all_but_first(card_info) if hidden
   
-  card_strings = { edge: '', top: '', value: '', bot: '' }
-  separator = ' ' * 3
-  card_info.each do |card|
-    card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
-    card_strings[:top]   += "|#{card[:suit].ljust(card[:width])}|" + separator
-    card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator 
-    card_strings[:bot]   += "|#{card[:suit].rjust(card[:width])}|" + separator
-    card_strings[:bot_edge] = card_strings[:edge]
-  end
+  card_strings = generate_card_strings(card_info)
   card_strings.each_value { |str| puts str }
 end
 
@@ -93,6 +85,20 @@ def hide_all_but_first(cards)
     card[:value] = '?'
     card[:width] = 5
   end
+end
+
+def generate_card_strings(card_info)
+  card_strings = { edge: '', top: '', value: '', bot: '' }
+  separator = ' ' * 3
+
+  card_info.each do |card|
+    card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
+    card_strings[:top]   += "|#{card[:suit].ljust(card[:width])}|" + separator
+    card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator 
+    card_strings[:bot]   += "|#{card[:suit].rjust(card[:width])}|" + separator
+    card_strings[:bot_edge] = card_strings[:edge]
+  end
+  card_strings
 end
 
 def prompt_player_choice
