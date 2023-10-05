@@ -62,10 +62,10 @@ def display_cards(hands, hidden: true)
   puts '=' * 50
 end
 
-def display_hand(hand, hidden:false)
+def display_hand(hand, hidden: false)
   card_info = hand.map { |card| extract_card_info(card) }
   hide_all_but_first(card_info) if hidden
-  
+
   card_strings = generate_card_strings(card_info)
   card_strings.each_value { |str| puts str }
 end
@@ -94,7 +94,7 @@ def generate_card_strings(card_info)
   card_info.each do |card|
     card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
     card_strings[:top]   += "|#{card[:suit].ljust(card[:width])}|" + separator
-    card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator 
+    card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator
     card_strings[:bot]   += "|#{card[:suit].rjust(card[:width])}|" + separator
     card_strings[:bot_edge] = card_strings[:edge]
   end
@@ -113,7 +113,7 @@ end
 def display_postgame(winner, player_total, dealer_total)
   busted_player = find_busted_player(player_total, dealer_total)
   if busted_player
-    display_busted(busted_player) 
+    display_busted(busted_player)
   else
     display_totals(player_total, dealer_total)
   end
@@ -138,7 +138,8 @@ def display_winner(winner)
 end
 
 def display_series_result(winner, scores)
-  prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
+  losing_score, winning_score = scores.values.minmax
+  prompt("#{winner} wins with a score of #{winning_score}-#{losing_score}!")
 end
 
 # Game Calculation/Logic
