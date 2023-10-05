@@ -135,15 +135,9 @@ def display_series_result(winner, scores)
   prompt("#{winner} wins with a score of #{scores[winner.downcase.to_sym]}-#{scores.values.min}!")
 end
 
-
 # Game Calculation/Logic
 def initialize_deck
-  SUITS.product(FACES)
-end
-
-def initialize_hands(deck)
-  hands = { player: [], dealer: [] }
-  hands.each { |_party, hand| deal_cards!(deck, hand, 2) } 
+  SUITS.product(FACES).shuffle
 end
 
 def deal_cards!(deck, hand, int=1)
@@ -264,7 +258,9 @@ loop do
   # Game Loop
   loop do 
     deck = initialize_deck
-    hands = initialize_hands(deck)
+    hands = { player: [], dealer: [] }
+    hands.each_value { |hand| deal_cards!(deck, hand, 2) }
+
     display_game(hands, scores)
 
     player_turn(deck, hands, scores)
