@@ -54,6 +54,7 @@ def display_scores(scores)
 end
 
 def display_cards(hands, hidden: true)
+  puts '=' * 50
   prompt("Dealer's Cards:")
   display_hand(hands[:dealer], hidden: hidden)
   puts '=' * 50
@@ -89,7 +90,7 @@ end
 
 def generate_card_strings(card_info)
   card_strings = { edge: '', top: '', value: '', bot: '' }
-  separator = ' ' * 3
+  separator = ' ' * 2
 
   card_info.each do |card|
     card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
@@ -126,7 +127,8 @@ def display_busted(busted_player)
 end
 
 def display_totals(player_total, dealer_total)
-  prompt("Your hand is worth #{player_total}; the dealer's hand is worth #{dealer_total}.")
+  prompt("Your hand is worth #{player_total}; " \
+         "the dealer's hand is worth #{dealer_total}.")
 end
 
 def display_winner(winner)
@@ -148,7 +150,7 @@ def initialize_deck
 end
 
 def deal_cards!(deck, hand, int=1)
-  int.times do 
+  int.times do
     card = deck.sample
     hand << deck.delete(card)
   end
@@ -192,8 +194,6 @@ def find_busted_player(player_total, dealer_total)
     'Player'
   elsif busted?(dealer_total)
     'Dealer'
-  else
-    nil
   end
 end
 
@@ -256,14 +256,14 @@ def play_again?
   end
 end
 
-# Main Program 
+# Main Program
 display_rules
 # Series Loop
 loop do
   number_of_wins = choose_number_of_wins
   scores = { player: 0, dealer: 0 }
   # Game Loop
-  loop do 
+  loop do
     deck = initialize_deck
     hands = { player: [], dealer: [] }
     hands.each_value { |hand| deal_cards!(deck, hand, 2) }
@@ -282,11 +282,11 @@ loop do
     display_postgame(winner, player_total, dealer_total)
 
     break if scores.values.any?(number_of_wins)
-    
+
     prompt("Press any key to continue:")
     $stdin.getch
   end
-  
+
   series_winner = determine_series_winner(scores)
   display_series_result(series_winner, scores)
 
