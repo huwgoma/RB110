@@ -43,11 +43,6 @@ def choose_number_of_wins
   end
 end
 
-def format_card_string(card)
-  "#{card.last} of #{card.first}"
-end
-
-# refactor hide dealer sometime
 def display_game(hands, scores, hide_dealer: true)
   system('clear')
   display_scores(scores)
@@ -99,41 +94,6 @@ def hide_all_but_first(cards)
     card[:width] = 5
   end
 end
-# display card visually:
-# given an array representing a card eg. ['Hearts', '10'] or ['Spades', 'Ace']
-# - optional hidden toggle
-# output a visual representation of the card
-# eg. 
-# +-------+
-# |H      |
-# |  10   |
-# |     H |
-# +-------+
-
-# +-------+
-# |?      |
-# |   ?   |
-# |     ? |
-# +-------+
-
-# side-by-side? eg.
-# +------+   +-----+   +-----+
-# |H-----|   |S    |   |D    |
-# |--10--|   |  A  |   |  2  |
-# |-----H|   |    S|   |    D|
-# +------+   +-----+   +-----+
-# not fixed cell width - card width dependent on the value of the card (7 for 1-value; 8 for 2-value) (6 +1 or +2)
-# Suit (1) + space (1) + Value(1 or 2) + space(1) + Suit(1) => 5 or 6; +2 for the edges (+)
-
-
-
-def display_dealer_hand(hand, hidden=true)
-  if hidden
-    prompt("Dealer: #{format_card_string(hand.first)} + Hidden Card")
-  else
-    prompt("Dealer: #{hand.map { |card| format_card_string(card) }}") 
-  end
-end
 
 def prompt_player_choice
   loop do
@@ -145,7 +105,7 @@ def prompt_player_choice
 end
 
 def display_postgame(winner, player_total, dealer_total)
-  busted_player = find_busted_player(player_total, dealer_total) #we just know SOMEONE busted - but not who yet 
+  busted_player = find_busted_player(player_total, dealer_total)
   if busted_player
     display_busted(busted_player) 
   else
