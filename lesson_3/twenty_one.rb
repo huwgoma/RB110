@@ -59,11 +59,11 @@ def display_cards(hands, hidden: true)
   display_hand(hands[:dealer], hidden: hidden)
   puts '=' * 50
   prompt("Your Cards:")
-  display_hand(hands[:player])
+  display_hand(hands[:player], hidden: false)
   puts '=' * 50
 end
 
-def display_hand(hand, hidden: false)
+def display_hand(hand, hidden: true)
   card_info = hand.map { |card| extract_card_info(card) }
   hide_all_but_first(card_info) if hidden
 
