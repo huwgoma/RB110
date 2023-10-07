@@ -67,8 +67,8 @@ def display_hand(hand, hidden: true)
   card_info = hand.map { |card| extract_card_info(card) }
   hide_all_but_first(card_info) if hidden
 
-  card_strings = generate_card_strings(card_info)
-  card_strings.each_value { |str| puts str }
+  card_string = generate_card_string(card_info)
+  puts card_string
 end
 
 def extract_card_info(card)
@@ -88,18 +88,18 @@ def hide_all_but_first(cards)
   end
 end
 
-def generate_card_strings(card_info)
-  card_strings = { edge: '', top: '', value: '', bot: '' }
+def generate_card_string(card_info)
+  card_strings = Array.new(5) { '' }
   separator = ' ' * 2
-
+  
   card_info.each do |card|
-    card_strings[:edge]  += "+#{'-' * card[:width]}+" + separator
-    card_strings[:top]   += "|#{card[:suit].ljust(card[:width])}|" + separator
-    card_strings[:value] += "|#{card[:value].center(card[:width])}|" + separator
-    card_strings[:bot]   += "|#{card[:suit].rjust(card[:width])}|" + separator
-    card_strings[:bot_edge] = card_strings[:edge]
+    card_strings[0] += "+#{'-' * card[:width]}+" + separator
+    card_strings[1] += "|#{card[:suit].ljust(card[:width])}|" + separator
+    card_strings[2] += "|#{card[:value].center(card[:width])}|" + separator
+    card_strings[3] += "|#{card[:suit].rjust(card[:width])}|" + separator
+    card_strings[4] = card_strings[0]
   end
-  card_strings
+  card_strings.join("\n")
 end
 
 def prompt_player_choice
