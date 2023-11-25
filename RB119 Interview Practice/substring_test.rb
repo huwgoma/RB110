@@ -1,16 +1,20 @@
-# Given 2 strings, write a method that determines if the two strings
-# share a common substring.
-# - Return true if there is a substring that appears in both strings
+# Substring Test
+# Given 2 strings, write a method that returns a Boolean:
+# - true if the two strings have a substring in common
 # - false otherwise
-# Substring: Any sequence of characters longer than 1 
-# - substrings are case-insensitive
-# - empty strings should always return false (bc empty strings 
-#   have no substrings)
+# For the purposes of this problem, substrings are any sequence of characters 
+# that are:
+# - Longer than 1 character
+# - case does not matter
+# - empty strings do not have any substrings
 
-# Input: Two strings
-# Output: A boolean
-# - True if both strings share a common substring (longer than 1 character)
-# - False otherwise
+# Input:
+#   Two strings, string_a and string_b
+# Output:
+#   A boolean: 
+#   - true if string_a and string_b have any sequence of characters longer than 2
+#     in common (case insensitive)
+#   - false otherwise
 
 # Examples:
 # substring_test('Something', 'Fun') == false
@@ -25,51 +29,48 @@
 # substring_test('supercalifragilisticexpialidocious', 
 #   'SoundOfItIsAtrociou') == true
 
-# Data: 
-#   The two strings given as inputs
-#   - Probably will need to create an array of all substrings (longer than 1 character)
-#     in each string.
+# Data:
+# The two strings given as input, string_a and string_b
+# - Will need to create an array of all substrings in both strings (greater than
+#   1 char long tho)
+# - Compare the two arrays of substrings to check if they have any elements in 
+#   common
 
 # Algorithm:
-# Given two strings, str1 and str2:
-# Create two arrays of the substrings (>1 char) in str1 and str2.
-#   Given a string, str:
-#     - Iterate through each index of str, skipping the last index (skip the last character 
-#       because substrings starting from the last character will only be 1 char long)
-#     - For each index, take a substring from str of length <length> (start at 2), starting from index
-#       - Add substring to substrings array.
-#       - Increment length by 1.
-#       - Keep looping until the length of the substring would exceed the length of the 
-#         string, starting from the current index.
-#       eg. Home - length = 2, index = 0 (H) => Ho (length 2) -> Hom (length 3) -> Home (length 4) 
-#           -> (length 5 would be greater than the length of 'Home' starting from index 0 (H))
-#           (H)ome - length = 2, index = 1 (o) => om (length 2) -> ome (length 3)
-#           -> (length 4 would be greater than the length of 'Home', starting from index 1(o))
-#     Return substrings array.
-# Check if the two substrings array (for str1 and str2) have any substrings in common.
-#   - Iterate through substrings1. for each substring of str1:
-#     - If any substring in str1 is included in str2's substrings, return true; otherwise false
+# Given two strings as input, string_a and string_b:
+# Create an array of the multi-char substrings in string_a and string_b
+#   - Iterate over each index of the given string. For each index:
+#     - Initialize a new variable, length = 2.
+#     - Initialize a loop: while index + length is less than/equal to the 
+#       string length:
+#       - Create a substring from str, starting at index, taking <length> chars
+#       - Increment length by 1
+# Check if there is any element in common between substring_a and substrings_b
+# - Array#&: Return a new array containing each element that is found in both
+#   the calling Array and the given Array.
+#   - Duplicates are omitted.
+#   - Order is preserved from the calling Array
+#   => ie. If the returned array is empty, there are no elements in common
+# ie. If the returned array contains any elements, return true (string_a and 
+#     string_b DO have a substring in common)
 
-def substring_test(str1, str2)
-  substrings1 = multichar_substrings(str1.downcase)
-  substrings2 = multichar_substrings(str2.downcase)
-  
-  # substrings1.any? { |substr| substrings2.include?(substr) }
-  (substrings1 & substrings2).any?
+def substring_test(str_a, str_b)
+  substrings_a = substrings(str_a.downcase, min_length: 2)
+  substrings_b = substrings(str_b.downcase, min_length: 2)
+  (substrings_a & substrings_b).any?
 end
 
-def multichar_substrings(str)
+def substrings(str, min_length: 1)
   substrings = []
   str.chars.each_index do |index|
-    length = 2
-    until length > str.length - index
+    length = min_length
+    until index + length > str.length
       substrings << str[index, length]
       length += 1
     end
   end
   substrings
 end
-
 
 
 
@@ -83,4 +84,5 @@ p substring_test('test', 'lllt') == false
 p substring_test('', '') == false
 p substring_test('1234567', '541265') == true
 p substring_test('supercalifragilisticexpialidocious', 
-   'SoundOfItIsAtrociou') == true
+  'SoundOfItIsAtrociou') == true
+
