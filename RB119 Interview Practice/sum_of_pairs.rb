@@ -1,13 +1,18 @@
-# Sum Of Pairs
-# Given an array of integers and an integer, return the first two values
-#   that can form the given integer when added.
+# Sum of Pairs
+# Write a method that takes an array of integers and an integer `target_sum`, 
+#   and returns an array of the two values in `integers` that can be added to 
+#   form the `target_sum`.
+# - If there are two or more pairs that can form the req'd sum, return the pair
+#   whose SECOND element has the smaller index.
+# - If there are no pairs of integers that can produce the req'd sum, return nil.
 
-# Input: An array of integers; also an integer representing the desired sum
-# Output: An array of the two earliest integers that add up to reproduce
-#   the sum
-# - If there are two or more pairs with the required sum, the pair whose 
-#   SECOND element has the smaller index is the solution.
-# - nil if no such pairs exist
+# store valid second index in var; if a new valid pair is found, and the second index is smaller, update the valid pair
+
+# Input: An array of integers, and an integer acting as the target sum
+# Output: An array representing the two integers that add up to the target sum
+# - nil if no such integer pair exists
+# - If multiple pairs exist, return the one with the lowest second index value
+#   (ie. the pair whose second element appears the earliest)
 
 # Examples:
 # sum_pairs([1, 4, 8, 7, 3, 15], 8) == [1, 7]
@@ -20,74 +25,43 @@
 # sum_pairs([5, 9, 13, -3], 10) == [13, -3]
 
 # Data:
-# The array of integers given as input
-# - Probably iterate through each index and calculate the sum of the current integer
-#   + the integers at index + 1, index + 2, ... until last index
+# The array of integers given as input, `integers`
+# - Iterate through integers and create a nested array of subarrays, where each
+#   subarray represents a possible pair of integers
+#   - Initialize two loops to track the index of the first element and the index of 
+#     the second element.
+# Maybe create a hash to store the solution:
+#   - { Pair: [ele1, ele2], second_index: some number }
+#   - If the current pair of integers matches target sum, update solution hash's pair and second_index 
+#     only if the current second index is less than solution[second_index]
+# The integer given as input, `target_sum`
 
+# Algorithm:
+# Given an array of integers as input, `integers`, and an integer as the target sum:
+# Initialize a new Hash, solution = { pair: nil, second_index: integers.size (?) }
+# Create a nested array of 2-element pairs in `integers`.
+#   - Create 2 nested loops:
+#   1) [i] Track the index of the first element
+#   2) [i2] Track the index of the second element
+#   For each pair of elements:
+#   - If integers[i] + integers[i2] is equal to the target sum AND i2 is less than solution[second_index]:
+#     - Update solution[pair] = [integers[i], integers[i2]] and solution[second_index] to
+#       second index
+# Return solution[pair]
 
-# Algorithm: 
-# Given an array of integers as input, and a desired integer sum:
-# Iterate through integers with index. For each integer/index:
-#   Initialize a loop and end_index = index + 1. For each iteration:
-#     Calculate the sum of adding the current integer to the integer at 
-#       the current end_index.
-#     If the sum is equal to the given sum, RETURN the current integer and the 
-#       end integer in an array.
-#     Otherwise, increment end_index by 1
-#     Stop looping when end_index reaches the size of integers 
-# If we make it out of iteration without returning anything, return nil
+def sum_pairs(integers, target_sum)
+  solution = { pair: nil, second_index: integers.size }
 
-def sum_pairs(integers, sum)
-  integers.each_with_index do |int, index|
-    end_index = index + 1
-    while end_index < integers.size
-      end_int = integers[end_index]
-      return [int, end_int] if int + end_int == sum
-      end_index += 1
-    end
-  end
-  nil
-end
-
-# p sum_pairs([1, 4, 8, 7, 3, 15], 8) == [1, 7]
-# p sum_pairs([1, -2, 3, 0, -6, 1], -6) == [0, -6]
-# p sum_pairs([20, -13, 40], -7) == nil
-# p sum_pairs([1, 2, 3, 4, 1, 0], 2) == [1, 1]
-# p sum_pairs([10, 5, 2, 3, 7, 5], 10) # == [3, 7]
-# p sum_pairs([4, -2, 3, 3, 4], 8) == [4, 4]
-# p sum_pairs([0, 2, 0], 0) == [0, 0]
-# p sum_pairs([5, 9, 13, -3], 10) == [13, -3]
-
-
-# p sum_pairs([10, 5, 2, 3, 7, 5], 10) # == [3, 7]
-# Returning [5, 5], but we want to return [3, 7] because 7 (the second number)
-#   has the smaller index than the second 5.
-# Could maybe collect all the possible solutions as hashes?
-#   Key: The index, Value: The corresponding integer at the index
-
-# [5, 2, 8, 3, 7, 5] => [ 
-#   { pair: [5, 5], end_index: 5 },
-#   { pair: [2, 8], end_index: 2 },
-#   { pair: [3, 7], end_index: 4 }
-# ] 
-
-# Find the hash that has the smallest end_index value.
-
-def sum_pairs(integers, sum)
-  possible_pairs = []
-  integers.each_with_index do |int, index|
-    end_index = index + 1
-
-    while end_index < integers.size
-      end_int = integers[end_index]
-      if int + end_int == sum
-        possible_pairs << { pair: [int, end_int], end_index: end_index }
+  (0...(integers.size - 1)).each do |i|
+    ((i + 1)...(integers.size)).each do |i2|
+      first_int, second_int = integers[i], integers[i2]
+      if first_int + second_int == target_sum && i2 < solution[:second_index]
+        solution[:pair] = [first_int, second_int]
+        solution[:second_index] = i2
       end
-      end_index += 1
     end
   end
-  return nil if possible_pairs.empty?
-  possible_pairs.min_by { |hash| hash[:end_index] }[:pair]
+  solution[:pair]
 end
 
 p sum_pairs([1, 4, 8, 7, 3, 15], 8) == [1, 7]
@@ -98,3 +72,4 @@ p sum_pairs([10, 5, 2, 3, 7, 5], 10) == [3, 7]
 p sum_pairs([4, -2, 3, 3, 4], 8) == [4, 4]
 p sum_pairs([0, 2, 0], 0) == [0, 0]
 p sum_pairs([5, 9, 13, -3], 10) == [13, -3]
+
